@@ -77,15 +77,6 @@ class AppSegmentData(object):
         finally:
             f.seek(now)
         
-        """
-        for app_segment_data in self.app_segment_data_list:
-            now = f.tell()
-            f.seek(now - 4)
-            data = struct.pack("%sI" % ep, now - app_offset)
-            f.write(data)
-            self.write_data(f, ep, app_offset)
-        """
-        
     def read_data(self, f, ep, app_offset):
         # next_pointer_offset, ifd_data_list = read_ifd_data(f, ep, app_offset, self.ifd_data_list)
         
@@ -171,11 +162,6 @@ class IfdData(object):
             if self.tag_id == define.tag_name_to_id_dict["Exif_IFD_Pointer"][0]:
                 ifd_offset = self.ifd_offset
             else:
-                # struct_data = define.data_struct_dict[self.tag_type] * self.ifd_count
-                # ifd_offset_string_temp = struct.pack("%s%s" % (ep, struct_data), *self.main_data)
-                # ifd_offset_string = ifd_offset_string_temp.ljust(4, "\x00")
-                # convert_data_to_int()
-                
                 ifd_offset = convert_data_to_int(ep, self.tag_type, self.ifd_count, self.main_data)
 
         return (self.tag_id, self.tag_type, self.ifd_count, ifd_offset)
@@ -203,10 +189,6 @@ class IfdData(object):
                 finally:
                     f.seek(now)
         else:
-            # struct_data = define.data_struct_dict[self.tag_type] * self.ifd_count
-            # ifd_offset_string_temp = struct.pack("%sI"  % ep, self.ifd_offset)
-            # ifd_offset_string = ifd_offset_string_temp[0: struct.calcsize(struct_data)]
-            # main_data = struct.unpack("%s%s" % (ep, struct_data), ifd_offset_string)
             self.main_data = convert_int_to_data(ep, self.tag_type, self.ifd_count, self.ifd_offset)
             
             if self.tag_id == define.tag_name_to_id_dict["Exif_IFD_Pointer"][0]:
@@ -311,12 +293,6 @@ def write_ifd_data(f, ep, app_offset, ifd_data_list):
         f.seek(now)
 
     return offset_pointer
-    """
-    f.seek(now)
-    next_ifd_offset = 0  # todo
-    data = struct.pack("%sI" % ep, next_ifd_offset)
-    f.write(data)
-    """
 
 # ifd
 def read_ifd_data(f, ep, app_offset):
@@ -337,29 +313,6 @@ def read_ifd_data(f, ep, app_offset):
         
     (next_pointer_offset,) = data_read_one("I", f, ep)
     return next_pointer_offset, ifd_data_list
-   
-        #
-        # soi_data, segment_index = struct.unpack(">HH", data)
-
-"""
-def read_ifd_data_all(f, ep, app_offset):
-    
-    app_segment_data_list = []
-    
-    next_pointer = f.tell()
-    while True:
-        log("next_pointer %08X" % next_pointer)
-        f.seek(next_pointer)
-        next_pointer_offset, ifd_data_list = read_ifd_data(f, ep, app_offset)
-        log("next p %08X" % next_pointer_offset)
-        app_segment_data_list.append(AppSegmentData(ifd_data_list))
-        next_pointer = next_pointer_offset + app_offset
-        if next_pointer_offset == 0:
-            break
-
-
-    return app_segment_data_list
-"""
 
 
 def read_arw(input_file_path):
@@ -430,86 +383,15 @@ def write_jpeg(app_segment_data, jpeg_data_list, output_file_path):
         # Todo
 
 
-def get_jpeg(input_file_path, output_file_path):
-    
-    jpeg_data_list = []
-    
-    """
-    def get_jpeg_data_generater():
-        while True:
-            new_jpeg_data = []
-            jpeg_data_list.append(new_jpeg_data)
-            yield new_jpeg_data
-            generater = get_jpeg_data_generater()
-    """
-        
-    with open(input_file_path, "rb") as f:
-        now_data = None
-        
-        old_data_0 = None
-        old_data_1 = None
-        old_data_2 = None
-        
-        read_continue_flag = True
-        
-        now_jpeg_data = None
-        while read_continue_flag:
-            data = f.read(READ_SIZE)
-            if len(data) != READ_SIZE:
-                break
-            
-            data_list = struct.unpack((">%dB" % (READ_SIZE / DATA_SIZE)), data)
-            for now_data in data_list:
-
-                if (old_data_2, old_data_1, old_data_0, now_data) == (0xff, 0xd8, 0xff, 0xdb):
-                    now_jpeg_data = []
-                    jpeg_data_list.append(now_jpeg_data)
-                    now_jpeg_data.append(old_data_2)
-                    now_jpeg_data.append(old_data_1)
-                    now_jpeg_data.append(old_data_0)
-                elif (old_data_0, now_data) == (0xff, 0xd9):
-                    if now_jpeg_data is None:
-                        continue
-                    now_jpeg_data.append(now_data)
-                    now_jpeg_data = None
-                    
-                    if len(jpeg_data_list) == MAX_JPEG_DATA:
-                        read_continue_flag = False
-                
-                if now_jpeg_data:
-                    now_jpeg_data.append(now_data)
-
-                old_data_2 = old_data_1
-                old_data_1 = old_data_0
-                old_data_0 = now_data
-            
-            
-    log(len(jpeg_data_list))
-    log("end")    
-    if len(jpeg_data_list) != MAX_JPEG_DATA:
-        raise Error("jpegdata size is %d" % len(jpeg_data_list))
-    
-    jpeg_data = jpeg_data_list[-1]
-    with open(output_file_path, "wb") as f:
-        pack_data = struct.pack(">%dB" % len(jpeg_data), *jpeg_data)
-        f.write(pack_data)
-
 def arw_convert(input_file_path, output_file_path):
     exif_data, jpeg_data_list = read_arw(input_file_path)
     write_jpeg(exif_data, jpeg_data_list, output_file_path)
     read_jpeg(output_file_path)
     
-def one_file_test():
-    # input_file_path = os.path.join("D:\picture", "sample", "input", "DSC07986.ARW")
-    # output_file_path = os.path.join("D:\picture", "sample", "output", "DSC07986.jpg")
-    input_file_path = os.path.join("D:\picture", "strage", "2014_0219", "DSC06609.ARW")
-    output_file_path = os.path.join("D:\picture", "upload", "2014_0219", "DSC06609.jpg")
-    get_jpeg(input_file_path, output_file_path)
-
 
 def arw_read_test():
-    input_file_path = os.path.join("D:\picture", "sample", "input", "DSC07476.ARW")
-    output_file_path = os.path.join("D:\picture", "sample", "input", "DSC07479.jpg")
+    input_file_path = os.path.join("F:\picture", "sample", "input", "DSC07476.ARW")
+    output_file_path = os.path.join("F:\picture", "sample", "input", "DSC07479.jpg")
     exif_data, jpeg_data_list = read_arw(input_file_path)
     write_jpeg(exif_data, jpeg_data_list, output_file_path)
     read_jpeg(output_file_path)
@@ -517,7 +399,7 @@ def arw_read_test():
 def jpeg_read_test():
     # input_file_path = os.path.join("D:\picture", "sample", "input", "IMG_0737.JPG")
     # input_file_path = os.path.join("D:\picture", "sample", "input", "DSC02574.jpg")
-    input_file_path = os.path.join("D:\picture", "sample", "input", "P1000253.JPG")
+    input_file_path = os.path.join("F:\picture", "sample", "input", "P1000253.JPG")
     read_jpeg(input_file_path)
 
 
@@ -551,30 +433,12 @@ def main():
     # arw_read_test()
     # one_file_test()                                                                                                    
     
-    input_directory_path = os.path.join("D:\picture", "strage")
-    output_directory_path = os.path.join("D:\picture", "upload")
+    # input_directory_path = os.path.join("O:\picture", "pentax")
+    input_directory_path = os.path.join("F:\picture", "strage")
+    output_directory_path = os.path.join("F:\picture", "upload")
     all_execute(input_directory_path, output_directory_path)
+    print("end")
 
-"""
-if pointer_flag:
-    if tag_id == 0x927C:
-        yield "-"
-    else:
-        now = f.tell()
-        f.seek(ifd_offset)
-
-        struct_data = define.data_struct_dict[type_id] * ifd_count
-            
-        yield data_read_one(struct_data, f, ep)
-        f.seek(now)
-else:
-    if tag_id == 0x8769:
-        now = f.tell()
-        f.seek(ifd_offset)
-        for temp in ifd_data_generater(f, ep):
-            yield temp
-        f.seek(now)
-"""
 
 if __name__ == "__main__":
     main()

@@ -9,7 +9,7 @@ import utility
 import define
 import shutil
 
-YEAR = "2014_"
+YEAR = "2015_"
 
 class Error(Exception):
     pass
@@ -44,8 +44,14 @@ def all_execute(input_directory_path, output_directory_path):
         print("copy (%s) -> (%s)" % (input_file_path, output_file_path))
         if pass_already_exist_flag:
             if os.path.isfile(output_file_path) == True:
-                print("pass %s" % output_file_path)
-                continue
+                if os.path.getsize(input_file_path) == os.path.getsize(output_file_path):
+                    print("pass %s" % output_file_path)
+                    continue
+                else:
+                    print(output_file_path)
+                    output_file_path = "%s_%s%s" % (os.path.splitext(output_file_path)[0], 2, os.path.splitext(output_file_path)[1]) #
+
+                
         directory = os.path.dirname(output_file_path)
         if os.path.isdir(directory) == False:
             os.makedirs(directory)
@@ -57,12 +63,12 @@ def all_execute(input_directory_path, output_directory_path):
             os.remove(input_file_path)
         """
         # arw_convert(input_file_path, output_file_path)
-        
+    print("end")
 
 def main():
 
-    input_directory_path = r"G:\dcim"
-    output_directory_path = os.path.join(r"D:\picture", "strage")
+    input_directory_path = r"E:\dcim"
+    output_directory_path = os.path.join(r"F:\picture", "strage")
     all_execute(input_directory_path, output_directory_path)
 
 

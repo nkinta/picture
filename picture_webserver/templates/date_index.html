@@ -1,0 +1,30 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<hr>
+
+<ul>
+{% for data in data_list %}
+  <li>
+  	<h3>{{ data.name }}</h3>
+  	<ul>
+  	{% for child_data in data.children %}
+  		{% if child_data.name == "mp4" %}
+  			<li><a href="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}">{{ child_data.name }}</a></li>
+  		{% endif %}
+   		{% if child_data.name == "thumbnail" %}
+  			<li>
+  				<a href="{{ data.path }}{{ child_data.path }}">
+  					<img src="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}"/>
+  				</a>
+  			</li>
+  		{% endif %}
+  	{% endfor %}
+	</ul>
+  </li>
+{% endfor %}
+</body>
+</html>

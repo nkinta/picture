@@ -123,7 +123,7 @@ def create_process(command, call_back, interval=0.5, trycount=10, env=None):
 
     def temp_thread_func():
 
-        if isinstance(command, basestring):
+        if isinstance(command, str):
             command_tuple = get_command_tuple(command)
         else:
             command_tuple = tuple([re.sub(r"[\"']", "", result) for result in command])
@@ -157,13 +157,19 @@ def create_process(command, call_back, interval=0.5, trycount=10, env=None):
             time.sleep(interval)
             returncode = proc.poll()
             for line in proc.stdout:
-                stdout_message += line
+                stdout_message += str(line)
             if (returncode != None):
                 break
 
         call_back(returncode, stdout_message)
 
     return temp_thread_func
+
+
+def make_directory(file_path):
+    directory = os.path.dirname(file_path)
+    if os.path.isdir(directory) == False:
+        os.makedirs(directory)
 
 
 def copy_data(source_directory_path, destination_directory_path, source_file_path_list, forceFlag=False):

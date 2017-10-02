@@ -92,18 +92,21 @@ def child_folder2(child_name1, child_name2, child_name3, filename):
     """
 
     local_path = data["local_path"]
+    mimetype = data["mimetype"] # ("mimetype", None)
+    attachment = data.get("attachment", False) # ("mimetype", None)
+
     directory_path = os.path.dirname(local_path)
     basename = os.path.basename(local_path)
     
-    print("local_path", local_path)
+    print("mimetype", mimetype)
     
-    download_file_info = flask.send_from_directory(directory_path, "{}".format(basename), as_attachment=True)
+    download_file_info = flask.send_from_directory(directory_path, "{}".format(basename), mimetype=mimetype, as_attachment=attachment) # , as_attachment=True)
     
     return  download_file_info
 
 
 def main():
-    app.run(port=8080)
+    app.run(port=8080) # port=8080
     # app.add_url_rule('/favicon.ico', redirect_to=flask.url_for('static', filename='favicon.ico'))
 
 if __name__ == "__main__":

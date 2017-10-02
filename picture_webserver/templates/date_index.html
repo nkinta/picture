@@ -12,8 +12,14 @@
   	<h3>{{ data.name }}</h3>
   	<ul>
   	{% for child_data in data.children %}
-  		{% if child_data.name == "mp4" %}
+  		{% if child_data.name == "movie" %}
   			<li><a href="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}">{{ child_data.name }}</a></li>
+  		{% endif %}
+   		{% if child_data.name == "movie_small" %}
+  			<li><a href="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}">{{ child_data.name }}</a></li>
+  			<li>
+  				<video controls><source src="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}" /></video>
+			</li>
   		{% endif %}
    		{% if child_data.name == "thumbnail" %}
   			<li>

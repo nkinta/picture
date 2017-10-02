@@ -10,7 +10,11 @@ import json
 
 import config as cf
 
+DEFAULT = "DEFAULT"
+FFMPEG = "FFMPEG"
+
 THUMBNAIL_DEPOT = os.path.join(cf.OUTPUT_PATH, "thumbnail_depot")
+
 WEB_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
 
 INFO_FILE_NAME = "info.json"
@@ -63,8 +67,15 @@ class FileInfo():
         name = os.path.basename(os.path.splitext(self.local_path)[0])
         return name
     
-    def get_thumbnail_path(self):
-        return os.path.join(self.get_id())
+    def get_thumbnail_local_path(self, type=DEFAULT):
+        directory_path = os.path.join(cf.OUTPUT_PATH, "thumbnail_depot", self.get_id())
+        if type == DEFAULT:
+            return os.path.join(directory_path, "img_001.png")
+        elif type == FFMPEG:
+            return os.path.join(directory_path, "img_%03d.png")
+
+    def get_movie_small_local_path(self, type=DEFAULT):
+        return os.path.join(cf.OUTPUT_PATH, "movie_small_depot", self.get_id(), "movie_small.mp4")  # #  "movie_small.mp4"
     
     def to_json(self):
         result = {
@@ -76,11 +87,20 @@ class FileInfo():
                 {"name": "thumbnail",
                  "path": "thumbnail/",
                  "download_filename": "thumbnail_main.png",
-                 "local_path": os.path.join(THUMBNAIL_DEPOT, self.get_thumbnail_path(), "img_001.png"),
+                 "mimetype": "image/png",
+                 "local_path": self.get_thumbnail_local_path(),
                  },
-                {"name": "mp4",
-                 "path": "mp4/",
+                {"name": "movie_small",
+                 "path": "movie_small/",
+                 "download_filename": "movie_small.mp4",
+                 "mimetype": "video/mp4",
+                 "local_path": self.get_movie_small_local_path(),
+                    },
+                {"name": "movie",
+                 "path": "movie/",
                  "download_filename": "movie.mp4",
+                 "mimetype": None,
+                 "attachment": True,
                  "local_path": self.local_path,
                     },
             ]
@@ -96,26 +116,24 @@ def get_one_day_directory_name(dt):
     directory_name = '{}_{:0>2}{:0>2}'.format(*one_day)
     return directory_name
 
-def create_thumbnail_execute(file_info_list_by_date):
+def __create_ref_data_execute(file_info_list_by_date):
     
     for one_day, file_info_list in file_info_list_by_date.items():
         for file_info in file_info_list:
             # = file_info
-            
-            
             # output_file_path = os.path.join(THUMBNAIL_DEPOT, file_info.get_thumbnail_path(), "img_%03d.png")
-            output_file_path = os.path.join(THUMBNAIL_DEPOT, file_info.get_thumbnail_path(), "small.mpg")
+            output_file_path = os.path.join(file_info.get_thumbnail_local_path(FFMPEG))
+            # __create_thumbnail(file_info.local_path, output_file_path)
             
-            directory = os.path.dirname(output_file_path)
-            if os.path.isdir(directory) == False:
-                os.makedirs(directory)
-            # create_thumbnail_ffmpeg(file_info.local_path, output_file_path)
+            output_file_path = os.path.join(file_info.get_movie_small_local_path(FFMPEG))
             __create_small(file_info.local_path, output_file_path)
+            
             # return
 
+
 def __create_thumbnail(input_file_path, output_file_path):
-    
-    # return
+
+    utility.make_directory(output_file_path)
     
     command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf",  "fps=1/10,scale=192:-1", output_file_path)
     print(command)
@@ -128,9 +146,17 @@ def __create_thumbnail(input_file_path, output_file_path):
     
 def __create_small(input_file_path, output_file_path):
 
-    return
+    utility.make_directory(output_file_path)
 
-    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf",  "scale=240:-1", output_file_path)
+    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path,
+               "-movflags", "faststart",
+               "-c:v", "libx264", # libx265 # libx264 # mpeg2 # libxvid
+               "-vf", "scale=960:-1",
+                "-b:v", "400k",
+                "-c:a", "aac",
+                # "-acodec aac -strict experimental"
+                "-b:a", "64k",
+               output_file_path)
     print(command)
     
     def call_back(returncode, stdout_message):
@@ -187,7 +213,7 @@ def main():
     
     # pprint.pprint(file_info_list_by_date)
     
-    create_thumbnail_execute(file_info_list_by_date)
+    __create_ref_data_execute(file_info_list_by_date)
     # print(file_list)
     
 

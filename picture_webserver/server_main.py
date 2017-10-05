@@ -6,10 +6,10 @@ import http.server
 import flask
 import jinja2
 import json
+import config as cf
 
-ROOT_PATH = r"D:\web_servert_test\web_root"
+ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
 INFO_FILE_NAME = "info.json"
-
 
 class Error(Exception):
     pass
@@ -46,32 +46,66 @@ def _get_data(data_children, child_name_list):
         if children_path:
             path = os.path.join(parent_path, path_dict[child_name]["children_info_path"])
             data_children = _get_info_data(path.replace("/", "\\"))
+            parent_path = path
         else:
             data_children = path_dict[child_name].get("children", None)
 
     return data, data_children
+
+
+def _add_info_for_web(data_type, data_list):
+    print(data_list)
+    data_info_dict = {v["name"]: v for v in data_list}
+
+    if data_type == "images":
+        data = data_info_dict["arw"]
+        data["download_size"] = "size({:,.0f}mb)".format(data["size"] / 1000000)
+    elif data_type == "movies":
+        data = data_info_dict["movie"]
+        data["download_size"] = "size({:,.0f}mb)".format(data["size"] / 1000000)
+    
+    return data_info_dict
+    # print("movie_data - ", movie_data)
+    
+    
+def _add_info_for_web_all(data_type, data_list):
+    
+    for data in data_list:
+        children = data.get("children")
+        if children is None:
+            continue
+        data["web"] = _add_info_for_web(data_type, children)
+
 
 @app.route("/")
 def root_folder():
     
     data = _get_info_data()
 
-    text = flask.render_template("index.html", data_list=data)
+    text = flask.render_template("directory_index.html", data_list=data)
     return text
 
 @app.route("/<child_name1>/")
 def child_folder1(child_name1):
     
     parent_data = _get_info_data()
-    
     _, data_children = _get_data(parent_data, [child_name1])
 
-    # template = jinja2_env.get_template("date_index.html")
-    # text = template.render({"data_list": data})
-    # template = jinja2_env.get_template("date_index.html")
-    text = flask.render_template("date_index.html", data_list=data_children)
+    text = flask.render_template("directory_index.html", data_list=data_children)
     
     return text
+
+@app.route("/<child_name1>/<child_name2>/")
+def child_folder2(child_name1, child_name2):
+    
+    parent_data = _get_info_data()
+    _, data_children = _get_data(parent_data, [child_name1, child_name2])
+
+    _add_info_for_web_all(child_name2, data_children)
+    text = flask.render_template("{}_index.html".format(child_name2), data_list=data_children)
+    
+    return text
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -79,11 +113,11 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@app.route("/<child_name1>/<child_name2>/<child_name3>/<path:filename>")
-def child_folder2(child_name1, child_name2, child_name3, filename):
+@app.route("/<child_name1>/<child_name2>/<child_name3>/<child_name4>/<path:filename>")
+def child_data(child_name1, child_name2, child_name3, child_name4, filename):
     
     parent_data = _get_info_data()
-    data, _ = _get_data(parent_data, [child_name1, child_name2, child_name3])
+    data, _ = _get_data(parent_data, [child_name1, child_name2, child_name3, child_name4])
 
     """
     path_dict = dict([(v["name"], v) for v in data])
@@ -106,7 +140,7 @@ def child_folder2(child_name1, child_name2, child_name3, filename):
 
 
 def main():
-    app.run(port=8080) # port=8080
+    app.run(host="0.0.0.0", threaded=True, port=8080) # port=8080
     # app.add_url_rule('/favicon.ico', redirect_to=flask.url_for('static', filename='favicon.ico'))
 
 if __name__ == "__main__":

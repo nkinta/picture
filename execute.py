@@ -59,7 +59,7 @@ class AppSegmentData(object):
         size_pointer = f.tell()
         data = struct.pack("%sH" % ep, 0)  # todo:
         f.write(data)
-        data = struct.pack("%s6s" % ep, "Exif\0\0")
+        data = struct.pack("%s6s" % ep, b"Exif\0\0")
         f.write(data)
         app_offset = f.tell()
         unknown_data = 0x002a
@@ -128,7 +128,7 @@ def convert_int_to_data(ep, tag_type, count, v):
 def convert_data_to_int(ep, tag_type, count, v):
     struct_data = define.data_struct_dict[tag_type] * count
     v_string_temp = struct.pack("%s%s" % (ep, struct_data), *v)
-    v_string = v_string_temp.ljust(4, "\x00")
+    v_string = v_string_temp.ljust(4, b"\x00")
     result = struct.unpack("%sI" % ep, v_string)[0]
     return result
 
@@ -374,6 +374,8 @@ def write_jpeg(app_segment_data, jpeg_data_list, output_file_path):
     # ep = ">"
     byte_order = 0x4d4d
     ep = ENDIAN_TYPE[byte_order]
+
+    utility.make_directory(output_file_path)
     with open(output_file_path, "wb") as f:
         data = struct.pack("%sH" % ep, SOI_TAG)
         f.write(data)

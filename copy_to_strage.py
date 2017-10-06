@@ -67,8 +67,8 @@ def all_execute(input_directory_path, output_directory_path):
 
 def main():
 
-    input_directory_path = r"E:\dcim"
-    output_directory_path = os.path.join(r"F:\picture", "strage")
+    input_directory_path = r"U:\dcim"
+    output_directory_path = os.path.join(r"O:\picture", "strage")
     all_execute(input_directory_path, output_directory_path)
 
 

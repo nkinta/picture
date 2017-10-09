@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.2/css/swiper.min.css">
+
+	<style>
+		.container {
+			height:600
+		}
+		.swiper-container{
+			text-align: center;
+			height: auto;
+			width: auto;
+		}
+		.swiper-container .swiper-slide img{
+			max-width: 100%;
+			width: 100%;
+			height: auto;
+		}
+		.prettyprint{
+			border: none;
+			background: #fafafa;
+			color: #697d86;
+		}
+		#thumbnail .swiper-container{
+			text-align: center;
+			height: 100px;
+			width: 40px;
+		}
+		#thumbnail {
+
+	        box-sizing: border-box;
+	        padding: 10px 0;
+	    }
+	    #thumbnail .swiper-slide {
+	        width: 10%;
+
+	        opacity: 0.6;
+	        cursor: pointer;
+	    }
+	    #thumbnail .swiper-slide-active {
+	        opacity: 1;
+	    }
+	</style>
+
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.2/js/swiper.js"></script>
+
+
+<hr>
+<a href="../">back</a>
+<div class="container">
+<div id="slider" class="swiper-container">
+    <!-- Additional required wrapper -->
+    <div class="swiper-wrapper">
+		{% for data in data_list %}
+		  <div class="swiper-slide">
+		  	<h3>{{ data.name }}</h3>
+
+		  		{% set arw = data.web.arw %}
+		   		{% set thumbnail = data.web.thumbnail %}
+		  		{% set jpg = data.web.jpg %}
+
+				<img src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" />
+
+		  </div>
+		{% endfor %}
+    </div>
+    <!-- If we need pagination -->
+    <!-- If we need navigation buttons -->
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+
+</div>
+
+<div id="thumbnail" class="swiper-container">
+    <!-- Additional required wrapper -->
+    <div class="swiper-wrapper">
+		{% for data in data_list %}
+		  <div class="swiper-slide">
+		  		{% set arw = data.web.arw %}
+		   		{% set thumbnail = data.web.thumbnail %}
+		  		{% set jpg = data.web.jpg %}
+
+				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+		  </div>
+		{% endfor %}
+    </div>
+</div>
+</div>
+<!--
+
+
+
+-->
+
+
+
+  <script>        
+
+
+  var slider = new Swiper ('#slider', {
+
+    nextButton: '.swiper-button-next',
+    prevButton: '.swiper-button-prev',
+ 
+  });
+  
+	var thumbnail = new Swiper('#thumbnail', {
+	  centeredSlides: true,
+	  spaceBetween: 10,
+	  slidesPerView: "auto",
+	  touchRatio: 0.2,
+	  slideToClickedSlide: true
+	});
+  
+  slider.params.control = thumbnail;
+  thumbnail.params.control = slider;
+  
+  
+  </script>
+  
+</body>
+</html>

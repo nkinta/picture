@@ -102,7 +102,7 @@ def child_folder2(child_name1, child_name2):
     _, data_children = _get_data(parent_data, [child_name1, child_name2])
 
     _add_info_for_web_all(child_name2, data_children)
-    text = flask.render_template("{}_index.html".format(child_name2), data_list=data_children)
+    text = flask.render_template("{}_index_test.html".format(child_name2), data_list=data_children)
     
     return text
 

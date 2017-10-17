@@ -20,11 +20,15 @@
 			{% set arw = data.web.arw %}
 			{% set thumbnail = data.web.thumbnail %}
 			{% set jpg = data.web.jpg %}
+			{% set exif_info = data.web.exif_info %}
 			<div class="swiper-slide">
 				<h3>{{ data.name }}</h3>
 			  	<ul>
 					<li>
 						<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
+					</li>
+					<li>
+						<a href="{{ data.path }}{{ exif_info.path }}{{ info.download_filename }}">download_{{ exif_info.name }}</a>
 					</li>
 					<li>
 						<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>

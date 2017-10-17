@@ -3,18 +3,51 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="../../../static/css/default.css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+
 
 </head>
 <body>
 
-<script
-  src="https://code.jquery.com/jquery-3.2.1.js"
-  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-  crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+
+const request = new XMLHttpRequest();
+function showInfoDialog(url) {
+
+	request.open("GET", url);
+	request.addEventListener("load", (event) => {
+	    if (event.target.status !== 200) {
+	        console.log("success");
+	        return;
+	    }
+	    console.log(event.target.status);
+	    var object = window.JSON.parse(event.target.responseText);
+	    console.log(object);
+	    
+	    var p = $( "#dialog p" )
+	    p.text(object.ISOSpeedRatings);
+	    $( function() {
+	        $( "#dialog" ).dialog();
+	      } );
+	    
+	});
+	request.send();
+}
 </script>
 
-<hr>
+
 <a href="../">back</a>
+<hr>
+{% if prev %}
+<a href="../../{{ prev }}/images">prev</a>
+{% endif %}
+{% if next %}
+<a href="../../{{ next }}/images">next</a>
+{% endif %}
 
 <div class="swiper-container">
     <!-- Additional required wrapper -->
@@ -23,11 +56,15 @@
 			{% set arw = data.web.arw %}
 			{% set thumbnail = data.web.thumbnail %}
 			{% set jpg = data.web.jpg %}
+			{% set exif_info = data.web.exif_info %}
 			<div class="swiper-slide">
 				<h3>{{ data.name }}</h3>
 			  	<ul>
 					<li>
 						<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
+					</li>
+					<li>
+						<div onclick="showInfoDialog('{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}')">{{ exif_info.name }}</div>
 					</li>
 					<li>
 						<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>
@@ -39,6 +76,11 @@
 </div>
   <script>       
   </script>
-  
+
+<div id="dialog" title="Basic dialog">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
+ 
+
 </body>
 </html>

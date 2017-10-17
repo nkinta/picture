@@ -6,25 +6,24 @@
 
 <hr>
 <a href="../">back</a>
-<ul>
+<div>
 {% for data in data_list %}
-  <li>
-  	<h3>{{ data.name }}</h3>
-  	<ul>
-  	{% for child_data in data.children %}
-  		{% if child_data.name == "movie" %}
-  			<li><a href="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}">download_{{ child_data.name }}</a> - {{ child_data.download_size }}</li>
-  		{% endif %}
-   		{% if child_data.name == "movie_small" %}
-  			<li><a href="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}">watch</a></li>
-  			<li>
-  				<video controls width="320"><source src="{{ data.path }}{{ child_data.path }}{{ child_data.download_filename }}" /></video>
-			</li>
-  		{% endif %}
+	<div>
+	 	<h3>{{ data.name }}</h3>
 
-  	{% endfor %}
-	</ul>
-  </li>
+	 	{% for child_data in data.children %}
+	 		{% set thumbnail = data.web.thumbnail %}
+			{% set movie = data.web.movie %}
+			{% set movie_small = data.web.movie_small %}
+	 		<div>
+	 			<div><a href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">download_{{ movie.name }}</a> - {{ movie.download_size }}</div>
+	 			<div><a href="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}">watch</a></div>
+	 			<video controls width="320"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}" /></video>
+	 		</div>
+	 	{% endfor %}
+		</div>
+	</div>
 {% endfor %}
+</div>
 </body>
 </html>

@@ -10,6 +10,9 @@ import json
 
 import config as cf
 
+# import define
+# jpeg_tag_dict = {v[2] : v for v in define.tag_list}
+
 DEFAULT = "DEFAULT"
 FFMPEG = "FFMPEG"
 
@@ -79,6 +82,11 @@ class ImageFileInfo():
     def get_size(self):
         return os.path.getsize(self.local_path)
 
+    def get_info_local_path(self):
+        temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "info", *(self.get_id().split("_")))
+        result_path = "{}{}".format(temp_path, ".info")
+        return result_path
+
     def get_thumbnail_local_path(self):
         temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", *(self.get_id().split("_")))
         result_path = "{}{}".format(temp_path, ".jpg")
@@ -117,6 +125,12 @@ class ImageFileInfo():
                  "mimetype": "image/jpeg",
                  "local_path": self.get_thumbnail_local_path(),
                  },
+                {"name": "exif_info",
+                 "path": "exif_info/",
+                 "download_filename": "exif_info.json",
+                 "mimetype": "application/json",
+                 "local_path": self.get_info_local_path(),
+                 },
             ]
         }
         return result
@@ -147,12 +161,15 @@ class MovieFileInfo():
     def get_thumbnail_local_path(self, type=DEFAULT):
         directory_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", self.get_id())
         if type == DEFAULT:
-            return os.path.join(directory_path, "img_001.png")
+            return os.path.join(directory_path, "img_001.jpg")
         elif type == FFMPEG:
-            return os.path.join(directory_path, "img_%03d.png")
+            return os.path.join(directory_path, "img_%03d.jpg")
 
     def get_movie_small_local_path(self, type=DEFAULT):
         return os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_small", self.get_id(), "movie_small.mp4")  # #  "movie_small.mp4"
+
+    def get_movie_medium_local_path(self, type=DEFAULT):
+        return os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_medium", self.get_id(), "movie_medium.mp4")  # #  "movie_small.mp4"
     
     def get_size(self):
         return os.path.getsize(self.local_path)
@@ -166,7 +183,7 @@ class MovieFileInfo():
             "children": [
                 {"name": "thumbnail",
                  "path": "thumbnail/",
-                 "download_filename": "thumbnail_main.png",
+                 "download_filename": "thumbnail_main.jpg",
                  "mimetype": "image/png",
                  "local_path": self.get_thumbnail_local_path(),
                  },
@@ -175,6 +192,12 @@ class MovieFileInfo():
                  "download_filename": "movie_small.mp4",
                  "mimetype": "video/mp4",
                  "local_path": self.get_movie_small_local_path(),
+                    },
+                {"name": "movie_medium",
+                 "path": "movie_medium/",
+                 "download_filename": "movie_medium.mp4",
+                 "mimetype": "video/mp4",
+                 "local_path": self.get_movie_medium_local_path(),
                     },
                 {"name": "movie",
                  "path": "movie/",
@@ -199,26 +222,47 @@ def get_one_day_directory_name(dt):
 
 def _create_image_ref_data_execute(file_info_list_by_date):
     
-    for one_day, file_info_list in file_info_list_by_date.items():
-        for file_info in file_info_list:
-            _create_image_jpg(file_info.local_path, file_info.get_jpg_local_path())
-            _create_image_thumbnail(file_info.get_jpg_local_path(), file_info.get_thumbnail_local_path())
+    func_list = [
+        lambda v: _create_image_jpg(v.local_path, v.get_jpg_local_path()),
+        lambda v: _create_image_thumbnail(v.get_jpg_local_path(), v.get_thumbnail_local_path()),
+        lambda v: _create_image_info(v.get_jpg_local_path(), v.get_info_local_path())
+        ]    
+            
+    for func in func_list:
+        for one_day, file_info_list in file_info_list_by_date.items():
+            for file_info in file_info_list:
+                func(file_info)
             # return
 def _create_movie_ref_data_execute(file_info_list_by_date):
-    
+
+    func_list = [
+        lambda v: _create_movie_small("1920", "4000k", "128k", v.local_path, v.get_movie_medium_local_path(FFMPEG)),
+        lambda v: _create_movie_small("960", "400k", "64k", v.get_movie_medium_local_path(FFMPEG), v.get_movie_small_local_path(FFMPEG)),
+        lambda v: _create_movie_thumbnail(v.get_movie_small_local_path(FFMPEG), v.get_thumbnail_local_path(FFMPEG)),
+        ]
+    for func in func_list:
+        for one_day, file_info_list in file_info_list_by_date.items():
+            for file_info in file_info_list:
+                func(file_info)
+            
+    """
+    for one_day, file_info_list in file_info_list_by_date.items():
+        for file_info in file_info_list:
+            _create_movie_small("960", "400k", "64k", file_info.get_movie_medium_local_path(FFMPEG), file_info.get_movie_small_local_path(FFMPEG))
+
     for one_day, file_info_list in file_info_list_by_date.items():
         for file_info in file_info_list:
             # = file_info
             # output_file_path = os.path.join(THUMBNAIL_DEPOT, file_info.get_thumbnail_path(), "img_%03d.png")
             # __create_thumbnail(file_info.local_path, output_file_path)
 
-            _create_movie_small(file_info.local_path, file_info.get_movie_small_local_path(FFMPEG))
+            _create_movie_thumbnail(file_info.get_movie_small_local_path(FFMPEG), file_info.get_thumbnail_local_path(FFMPEG))
+    """
 
 
 def _create_image_jpg(input_file_path, output_file_path):
     import execute
     execute.arw_convert(input_file_path, output_file_path)
-
 
 def _create_image_thumbnail(input_file_path, output_file_path):
     from PIL import Image
@@ -232,34 +276,53 @@ def _create_image_thumbnail(input_file_path, output_file_path):
     
     utility.make_directory(output_file_path)
     img.save(output_file_path)
-    # execute.arw_convert(input_file_path, output_file_path)
-
-
-def _create_movie_thumbnail(input_file_path, output_file_path):
+    
+def _create_image_info(input_file_path, output_file_path):
+    from PIL import Image
+    from PIL.ExifTags import TAGS
+    
+    img = Image.open(input_file_path)
+    exif_dict = img._getexif()
+    
+    exif_result_info = {}
+    for tag_id, value in exif_dict.items():
+        tag = TAGS.get(tag_id, tag_id)
+        if isinstance(value, bytes):
+            continue
+        exif_result_info[tag] = value
+    # print(tag_dict)
+    """
+    exif_result_info = {}
+    for k, v in exif_dict.items():
+        tag_value = jpeg_tag_dict.get(k, None)
+        if tag_value:
+            tag_name = tag_value[0]
+            exif_result_info[tag_name] = v
+    """
 
     utility.make_directory(output_file_path)
+    write_data = json.dumps(exif_result_info, cls=JsonEncoder, indent="  ", )
+    with open(output_file_path, "w") as fp:
+        fp.write(write_data)
     
-    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf",  "fps=1/10,scale=192:-1", output_file_path)
-    print(command)
-    
-    def call_back(returncode, stdout_message):
-        print(returncode, stdout_message)
-        pass
-    
-    utility.create_process(command, call_back, 1, 1200)()
+    # pprint.pprint(exif_dict)
+    # execute.arw_convert(input_file_path, output_file_path)
 
-def _create_movie_small(input_file_path, output_file_path):
+def _create_movie_small(size, bv, ba, input_file_path, output_file_path):
+
+    if os.path.isfile(output_file_path):
+        return
 
     utility.make_directory(output_file_path)
 
     command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path,
                "-movflags", "faststart",
                "-c:v", "libx264", # libx265 # libx264 # mpeg2 # libxvid
-               "-vf", "scale=960:-1",
-                "-b:v", "400k",
+               "-vf", "scale={}:-1".format(size),
+                "-b:v", bv,
                 "-c:a", "aac",
                 # "-acodec aac -strict experimental"
-                "-b:a", "64k",
+                "-b:a", ba,
                output_file_path)
     print(command)
     
@@ -267,8 +330,23 @@ def _create_movie_small(input_file_path, output_file_path):
         print(returncode, stdout_message)
         pass
     
-    utility.create_process(command, call_back, 1, 1200)()
+    utility.create_process(command, call_back, 1, 2400)()
 
+def _create_movie_thumbnail(input_file_path, output_file_path):
+
+    if os.path.isdir(os.path.dirname(output_file_path)):
+        return
+        
+    utility.make_directory(output_file_path)
+    
+    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf",  "fps=1/10,scale=480:-1", output_file_path)
+    print(command)
+    
+    def call_back(returncode, stdout_message):
+        print(returncode, stdout_message)
+        pass
+    
+    utility.create_process(command, call_back, 1, 20)()
 
 def _create_info_file(file_info_list_by_date, cls):
 

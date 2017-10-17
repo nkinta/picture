@@ -41,10 +41,16 @@ def _get_data(data_children, child_name_list):
     for child_name in child_name_list:
         print(child_name)
         path_dict = dict([(v["name"], v) for v in data_children])
-        data = path_dict[child_name]
+        data = path_dict.get(child_name, None)
+        if data is None:
+            flask.abort(404)
         children_path = data.get("children_info_path", None)
         if children_path:
-            path = os.path.join(parent_path, path_dict[child_name]["children_info_path"])
+            child_dict = path_dict.get(child_name, None)
+            if child_dict is None:
+                flask.abort(404)
+            
+            path = os.path.join(parent_path, child_dict["children_info_path"])
             data_children = _get_info_data(path.replace("/", "\\"))
             parent_path = path
         else:
@@ -88,8 +94,8 @@ def root_folder():
 @app.route("/<child_name1>/")
 def child_folder1(child_name1):
     
-    parent_data = _get_info_data()
-    _, data_children = _get_data(parent_data, [child_name1])
+    root_data = _get_info_data()
+    _, data_children = _get_data(root_data, [child_name1])
 
     text = flask.render_template("directory_index.html", data_list=data_children)
     
@@ -98,11 +104,27 @@ def child_folder1(child_name1):
 @app.route("/<child_name1>/<child_name2>/")
 def child_folder2(child_name1, child_name2):
     
-    parent_data = _get_info_data()
-    _, data_children = _get_data(parent_data, [child_name1, child_name2])
+    root_data = _get_info_data()
+    data, data_children = _get_data(root_data, [child_name1, child_name2])
 
+    """
+    for i, root_child in enumerate(root_data):
+        name = root_child["name"]
+        if name == child_name1:
+            prev = 
+            
+    print("data_children-", data_children)
+    """
+
+    
+    index = {v["name"]: i for i, v in enumerate(root_data)}[child_name1]
+    root_data_dict = {i : v["name"] for i, v in enumerate(root_data)} 
+    
+    prev_name = root_data_dict.get(index - 1, None)
+    next_name = root_data_dict.get(index + 1, None)
+    
     _add_info_for_web_all(child_name2, data_children)
-    text = flask.render_template("{}_index_test.html".format(child_name2), data_list=data_children)
+    text = flask.render_template("{}_index_test.html".format(child_name2), data_list=data_children, prev=prev_name, next=next_name)
     
     return text
 
@@ -116,8 +138,8 @@ def favicon():
 @app.route("/<child_name1>/<child_name2>/<child_name3>/<child_name4>/<path:filename>")
 def child_data(child_name1, child_name2, child_name3, child_name4, filename):
     
-    parent_data = _get_info_data()
-    data, _ = _get_data(parent_data, [child_name1, child_name2, child_name3, child_name4])
+    root_data = _get_info_data()
+    data, _ = _get_data(root_data, [child_name1, child_name2, child_name3, child_name4])
 
     """
     path_dict = dict([(v["name"], v) for v in data])

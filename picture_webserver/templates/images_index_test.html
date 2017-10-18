@@ -3,21 +3,38 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="../../../static/css/default.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.min.css">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<style>
 
+	.swiper-container{
+		text-align: center;
+		width: auto;
+		height:auto;
+	}
+	.swiper-container .swiper-slide img{
+		max-width: 100%;
+		width: 100%;
+		height: auto;
+	}
+	
+
+</style>
 
 </head>
 <body>
 
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/js/swiper.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 
 <script>
 
 const request = new XMLHttpRequest();
-function showInfoDialog(url) {
 
+function showInfoDialog(url) {
 	request.open("GET", url);
 	request.addEventListener("load", (event) => {
 	    if (event.target.status !== 200) {
@@ -37,6 +54,16 @@ function showInfoDialog(url) {
 	});
 	request.send();
 }
+
+$(function(){	
+	var mySwiper = new Swiper('.swiper-container', {
+	    preloadImages: false,
+	    // Enable lazy loading
+	    lazyLoading: true
+	});
+});
+
+
 </script>
 
 
@@ -49,36 +76,56 @@ function showInfoDialog(url) {
 <a href="../../{{ next }}/images">next</a>
 {% endif %}
 
+<!-- Slider main container -->
 <div class="swiper-container">
     <!-- Additional required wrapper -->
     <div class="swiper-wrapper">
-		{% for data in data_list %}
-			{% set arw = data.web.arw %}
-			{% set thumbnail = data.web.thumbnail %}
-			{% set jpg = data.web.jpg %}
-			{% set exif_info = data.web.exif_info %}
-			<div class="swiper-slide">
-				<h3>{{ data.name }}</h3>
-			  	<ul>
-					<li>
-						<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
-					</li>
-					<li>
-						<div onclick="showInfoDialog('{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}')">{{ exif_info.name }}</div>
-					</li>
-					<li>
-						<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>
-					</li>
-				</ul>
+	{% for data in data_list %}
+		{% set arw = data.web.arw %}
+		{% set thumbnail = data.web.thumbnail %}
+		{% set jpg = data.web.jpg %}
+		{% set exif_info = data.web.exif_info %}
+		<div class="swiper-slide">
+			<h3>{{ data.name }}</h3>
+			<div>
+			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
+            <div class="swiper-lazy-preloader"></div>
+            </div>
+		</div>
+	{% endfor %}
+    </div>
+</div>
+
+<hr>
+<div>
+    <!-- Additional required wrapper -->
+    <div class="wrapper">
+	{% for data in data_list %}
+		{% set arw = data.web.arw %}
+		{% set thumbnail = data.web.thumbnail %}
+		{% set jpg = data.web.jpg %}
+		{% set exif_info = data.web.exif_info %}
+		<div>
+			<h3>{{ data.name }}</h3>
+
+			<div>
+				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
 			</div>
-		{% endfor %}
+			<div>
+				<div onclick="showInfoDialog('{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}')">{{ exif_info.name }}</div>
+			</div>
+			<div>
+				<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>
+			</div>
+		</div>
+	{% endfor %}
     </div>
 </div>
   <script>       
   </script>
 
 <div id="dialog" title="Basic dialog">
-  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+  <p></p>
 </div>
  
 

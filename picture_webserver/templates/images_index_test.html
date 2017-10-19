@@ -3,19 +3,25 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="../../../static/css/default.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.min.css">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.css">
 
 <style>
 
 	.swiper-container{
 		text-align: center;
 		width: auto;
-		height:auto;
+		height: auto;
 	}
 	.swiper-container .swiper-slide img{
-		max-width: 100%;
 		width: 100%;
+		height: auto;
+	}
+	.swiper-container .swiper-slide {
+		height: auto;
+	}
+	.swiper-container .swiper-wrapper {
+		width: auto;
 		height: auto;
 	}
 	
@@ -56,11 +62,20 @@ function showInfoDialog(url) {
 }
 
 $(function(){	
-	var mySwiper = new Swiper('.swiper-container', {
+	var swiper = new Swiper('.swiper-container', {
 	    preloadImages: false,
 	    // Enable lazy loading
 	    lazyLoading: true
 	});
+	
+	 $('.btn[data-index]').on('click', function () {
+		 swiper.slideTo($(this).data('index'));
+	});
+	
+	 $('.btn[data-exif_info]').on('click', function () {
+		showInfoDialog($(this).data('exif_info'));
+	});
+
 });
 
 
@@ -91,9 +106,20 @@ $(function(){
 			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
             <div class="swiper-lazy-preloader"></div>
             </div>
+
+			<div>
+				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
+			</div>
+			<div>
+				<div class="btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">{{ exif_info.name }}</div>
+			</div>
 		</div>
 	{% endfor %}
     </div>
+<div class="swiper-pagination"></div>
+
+<div class="swiper-button-prev"></div>
+<div class="swiper-button-next"></div>
 </div>
 
 <hr>
@@ -105,17 +131,10 @@ $(function(){
 		{% set thumbnail = data.web.thumbnail %}
 		{% set jpg = data.web.jpg %}
 		{% set exif_info = data.web.exif_info %}
-		<div>
-			<h3>{{ data.name }}</h3>
-
-			<div>
-				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
-			</div>
-			<div>
-				<div onclick="showInfoDialog('{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}')">{{ exif_info.name }}</div>
-			</div>
-			<div>
-				<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>
+		<div class="image">
+			<p>{{ data.name }}</p>
+			<div class="btn" data-index="{{ loop.index0 }}">
+				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
 			</div>
 		</div>
 	{% endfor %}
@@ -124,7 +143,7 @@ $(function(){
   <script>       
   </script>
 
-<div id="dialog" title="Basic dialog">
+<div id="dialog" title="exif">
   <p></p>
 </div>
  

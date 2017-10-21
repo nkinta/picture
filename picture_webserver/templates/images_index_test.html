@@ -2,38 +2,18 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<link rel="stylesheet" href="../../../static/css/default.css">
+<link rel="stylesheet" href="../../../static/css/default.css?q=1027766">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.css">
-
-<style>
-
-	.swiper-container{
-		text-align: center;
-		width: auto;
-		height: auto;
-	}
-	.swiper-container .swiper-slide img{
-		width: 100%;
-		height: auto;
-	}
-	.swiper-container .swiper-slide {
-		height: auto;
-	}
-	.swiper-container .swiper-wrapper {
-		width: auto;
-		height: auto;
-	}
-	
-
-</style>
-
-</head>
-<body>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/js/swiper.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+</head>
+<body>
+
+
 
 
 <script>
@@ -41,6 +21,8 @@
 const request = new XMLHttpRequest();
 
 function showInfoDialog(url) {
+	/*
+}
 	request.open("GET", url);
 	request.addEventListener("load", (event) => {
 	    if (event.target.status !== 200) {
@@ -59,6 +41,20 @@ function showInfoDialog(url) {
 	    
 	});
 	request.send();
+	*/
+	
+	$.get(url).done(function(data) {
+	    console.log(data);
+	    var p = $("#dialog p")
+	    p.text(data.ISOSpeedRatings);
+	    $( function() {
+	        $("#dialog").dialog({
+	        	  modal: true,
+	        	  position: { my: "center", at: "center", of: $(".swiper-container") },
+	        });
+	      } );
+	});
+
 }
 
 $(function(){	
@@ -68,11 +64,13 @@ $(function(){
 	    lazyLoading: true
 	});
 	
-	 $('.btn[data-index]').on('click', function () {
+	/*
+	 $('.square_btn[data-index]').on('click', function () {
 		 swiper.slideTo($(this).data('index'));
 	});
+	*/
 	
-	 $('.btn[data-exif_info]').on('click', function () {
+	 $('.square_btn[data-exif_info]').on('click', function () {
 		showInfoDialog($(this).data('exif_info'));
 	});
 
@@ -82,17 +80,17 @@ $(function(){
 </script>
 
 
-<a href="../">back</a>
+<a href="../">BACK</a>
 <hr>
 {% if prev %}
-<a href="../../{{ prev }}/images">prev</a>
+<a href="../../{{ prev }}/images">PREV</a>
 {% endif %}
 {% if next %}
-<a href="../../{{ next }}/images">next</a>
+<a href="../../{{ next }}/images">NEXT</a>
 {% endif %}
 
 <!-- Slider main container -->
-<div class="swiper-container">
+<div class="swiper-container" >
     <!-- Additional required wrapper -->
     <div class="swiper-wrapper">
 	{% for data in data_list %}
@@ -106,12 +104,11 @@ $(function(){
 			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
             <div class="swiper-lazy-preloader"></div>
             </div>
-
 			<div>
-				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
+				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}" class="square_btn">DOWNLOAD RAW {{ arw.download_size }}</a>
 			</div>
 			<div>
-				<div class="btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">{{ exif_info.name }}</div>
+				<a class="square_btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
 			</div>
 		</div>
 	{% endfor %}

@@ -65,10 +65,10 @@ def _add_info_for_web(data_type, data_list):
 
     if data_type == "images":
         data = data_info_dict["arw"]
-        data["download_size"] = "size({:,.0f}mb)".format(data["size"] / 1000000)
+        data["download_size"] = "{:,.0f}MB".format(data["size"] / 1000000)
     elif data_type == "movies":
         data = data_info_dict["movie"]
-        data["download_size"] = "size({:,.0f}mb)".format(data["size"] / 1000000)
+        data["download_size"] = "{:,.0f}MB".format(data["size"] / 1000000)
     
     return data_info_dict
     # print("movie_data - ", movie_data)

@@ -6,6 +6,71 @@ div .wrapper {
 }
 
 div .image {
-  padding: 5px;
+	padding: 5px;
 }
 
+a:hover {
+	text-decoration:underline;
+}
+
+a {
+	color:#545454;
+	text-decoration:none;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/*
+swiper
+*/
+
+.swiper-container{
+	text-align: center;
+	width: auto;
+	height: auto;
+}
+.swiper-container .swiper-slide img{
+	width: 100%;
+	height: auto;
+}
+.swiper-container .swiper-slide {
+	height: auto;
+}
+.swiper-container .swiper-wrapper {
+	width: auto;
+	height: auto;
+}
+
+/*
+button
+*/
+
+.square_btn{
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    padding: 0.25em;
+    text-decoration: none;
+    color: #00BCD4;
+    background: #ECECEC;
+    cursor: hand;
+    margin: 0.25em
+  }
+
+.square_btn_backup{
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    padding: 0.25em 0.5em;
+    text-decoration: none;
+    color: #00BCD4;
+    background: #ECECEC;
+    transition: .4s;
+    cursor: hand;
+    margin: 0.25em
+  }
+
+.square_btn:hover {
+    background: #00bcd4;
+    color: white;
+}

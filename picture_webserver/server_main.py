@@ -8,6 +8,7 @@ import jinja2
 import json
 import config as cf
 import datetime
+import zipfile
 
 ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
 INFO_FILE_NAME = "info.json"
@@ -107,16 +108,6 @@ def child_folder2(child_name1, child_name2):
     
     root_data = _get_info_data()
     data, data_children = _get_data(root_data, [child_name1, child_name2])
-
-    """
-    for i, root_child in enumerate(root_data):
-        name = root_child["name"]
-        if name == child_name1:
-            prev = 
-            
-    print("data_children-", data_children)
-    """
-
     
     index = {v["name"]: i for i, v in enumerate(root_data)}[child_name1]
     root_data_dict = {i : v["name"] for i, v in enumerate(root_data)} 
@@ -143,28 +134,54 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
+@app.route("/<child_name1>/<child_name2>/<path:filename>.zip")
+def all_zip(child_name1, child_name2, filename):
+    
+    root_data = _get_info_data()
+    data, data_children = _get_data(root_data, [child_name1, child_name2])
+    
+    file_info_list = []
+    for data_child in data_children:
+        target_data, _ = _get_data(root_data, [child_name1, child_name2, data_child["name"], filename])
+        local_path = target_data["local_path"]
+        attachment_filename = target_data["attachment_filename"]
+        file_info_list.append((local_path, attachment_filename))
+
+    common_directory_path = os.path.commonpath([v for v, _ in file_info_list])
+
+    zip_file_path = os.path.join(common_directory_path, "{}_{}.zip".format(child_name2, filename))
+    with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for file_path, file_name in file_info_list:
+            zf.write(file_path, arcname=file_name)
+
+    # print("data_children", data_children)
+    
+    directory_path = os.path.dirname(zip_file_path)
+    basename = os.path.basename(zip_file_path)
+    
+    mimetype = "application/zip"
+    download_file_info = flask.send_from_directory(directory_path, basename, mimetype=mimetype, as_attachment=True) # , as_attachment=True)
+    
+    return download_file_info
+
+
 @app.route("/<child_name1>/<child_name2>/<child_name3>/<child_name4>/<path:filename>")
-def child_data(child_name1, child_name2, child_name3, child_name4, filename):
+def child_data2(child_name1, child_name2, child_name3, child_name4, filename):
     
     root_data = _get_info_data()
     data, _ = _get_data(root_data, [child_name1, child_name2, child_name3, child_name4])
 
-    """
-    path_dict = dict([(v["name"], v) for v in data])
-    key = os.path.splitext(filename)[0]
-    data = path_dict[key]
-    """
-
     local_path = data["local_path"]
     mimetype = data["mimetype"] # ("mimetype", None)
     attachment = data.get("attachment", False) # ("mimetype", None)
+    attachment_filename = data.get("attachment_filename", None)
 
     directory_path = os.path.dirname(local_path)
     basename = os.path.basename(local_path)
     
     print("mimetype", mimetype)
     
-    download_file_info = flask.send_from_directory(directory_path, "{}".format(basename), mimetype=mimetype, as_attachment=attachment) # , as_attachment=True)
+    download_file_info = flask.send_from_directory(directory_path, basename, mimetype=mimetype, as_attachment=attachment, attachment_filename=attachment_filename) # , as_attachment=True)
     
     return  download_file_info
 

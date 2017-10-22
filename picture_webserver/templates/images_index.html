@@ -9,11 +9,12 @@
 		{% set arw = data.web.arw %}
 		{% set thumbnail = data.web.thumbnail %}
 		{% set jpg = data.web.jpg %}
+		{% set jpg_medium = data.web.jpg_medium %}
 		{% set exif_info = data.web.exif_info %}
 		<div class="swiper-slide">
 			<h3>{{ data.name }}</h3>
 			<div>
-			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
+				<img data-src="{{ data.path }}{{ jpg_medium.path }}{{ jpg_medium.download_filename }}" class="swiper-lazy">
             <div class="swiper-lazy-preloader"></div>
             </div>
 			<div>
@@ -32,6 +33,9 @@
 </div>
 
 <hr>
+<div>
+	<a class="square_btn" href="./jpg.zip">DOWNLOAD ALL</a>
+</div>
 <div>
     <!-- Additional required wrapper -->
     <div class="wrapper">

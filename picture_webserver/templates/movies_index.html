@@ -12,12 +12,15 @@
 			{% set movie_small = data.web.movie_small %}
 			<div class="swiper-slide">
 			 	<h3>{{ data.name }}</h3>
- 				<div><video controls poster="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" preload="none"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}"/></video></div>
-
- 				<div><a class="square_btn" href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">DOWNLOAD ORIGINAL {{ movie.download_size }}</a></div>
- 				<div><a class="square_btn" href="{{ data.path }}{{ movie_medium.path }}{{ movie_medium.download_filename }}">DOWNLOAD MIDIUM</a></div>
- 				<div><a class="square_btn" href="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}">WATCH SMALL</a></div>
-
+ 				<div>
+ 					<video controls poster="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" preload="none"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}"/></video>
+ 				</div>
+ 				<div>
+ 					<a class="square_btn" href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">DOWNLOAD ORIGINAL {{ movie.download_size }}</a>
+ 				</div>
+ 				<div>
+ 					<a class="square_btn" href="{{ data.path }}{{ movie_medium.path }}{{ movie_medium.download_filename }}">DOWNLOAD MIDIUM</a>
+ 				</div>
 			</div>
 		{% endfor %}
 	</div>
@@ -28,6 +31,9 @@
 </div>
 
 <hr>
+<div>
+	<a class="square_btn" href="./movie_medium.zip">DOWNLOAD ALL</a>
+</div>
 <div>
     <!-- Additional required wrapper -->
     <div class="wrapper">

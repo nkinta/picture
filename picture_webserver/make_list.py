@@ -87,6 +87,11 @@ class ImageFileInfo():
         result_path = "{}{}".format(temp_path, ".info")
         return result_path
 
+    def get_medium_local_path(self):
+        temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "jpg_medium", *(self.get_id().split("_")))
+        result_path = "{}{}".format(temp_path, ".jpg")
+        return result_path
+
     def get_thumbnail_local_path(self):
         temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", *(self.get_id().split("_")))
         result_path = "{}{}".format(temp_path, ".jpg")
@@ -110,6 +115,7 @@ class ImageFileInfo():
                  "download_filename": "picture.arw",
                  "mimetype": "application/octet-stream",
                  "attachment": True,
+                 "attachment_filename": "{}.arw".format(self.get_id()),
                  "local_path": self.local_path,
                  "size": self.get_size()
                     },
@@ -117,8 +123,15 @@ class ImageFileInfo():
                  "path": "jpg/",
                  "download_filename": "picture.jpg",
                  "mimetype": "image/jpeg",
+                 "attachment_filename": "{}.jpg".format(self.get_id()),
                  "local_path": self.get_jpg_local_path(),
                     },
+                {"name": "jpg_medium",
+                 "path": "jpg_medium/",
+                 "download_filename": "picture_medium.jpg",
+                 "mimetype": "image/jpeg",
+                 "local_path": self.get_medium_local_path(),
+                 },
                 {"name": "thumbnail",
                  "path": "thumbnail/",
                  "download_filename": "thumbnail.jpg",
@@ -147,7 +160,8 @@ class MovieFileInfo():
     
     def get_id(self):
         basename = self.get_name()
-        dirname = os.path.basename(os.path.dirname(self.local_path))
+        # dirname = os.path.basename(os.path.dirname(self.local_path))
+        dirname = _get_one_day_directory_name(self.dt)
         id = "{}_{}".format(dirname, basename)
         return id
     
@@ -159,17 +173,21 @@ class MovieFileInfo():
         return name
     
     def get_thumbnail_local_path(self, type=DEFAULT):
-        directory_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", self.get_id())
+        directory_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", *(self.get_id().split("_")))
         if type == DEFAULT:
             return os.path.join(directory_path, "img_001.jpg")
         elif type == FFMPEG:
             return os.path.join(directory_path, "img_%03d.jpg")
 
     def get_movie_small_local_path(self, type=DEFAULT):
-        return os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_small", self.get_id(), "movie_small.mp4")  # #  "movie_small.mp4"
+        temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_small", *(self.get_id().split("_")))
+        result_path = "{}{}".format(temp_path, ".mp4")
+        return result_path
 
     def get_movie_medium_local_path(self, type=DEFAULT):
-        return os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_medium", self.get_id(), "movie_medium.mp4")  # #  "movie_small.mp4"
+        temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_medium", *(self.get_id().split("_")))
+        result_path = "{}{}".format(temp_path, ".mp4")
+        return result_path
     
     def get_size(self):
         return os.path.getsize(self.local_path)
@@ -191,6 +209,7 @@ class MovieFileInfo():
                  "path": "movie_small/",
                  "download_filename": "movie_small.mp4",
                  "mimetype": "video/mp4",
+                 "attachment_filename": "{}_small.mp4".format(self.get_id()),
                  "local_path": self.get_movie_small_local_path(),
                     },
                 {"name": "movie_medium",
@@ -198,6 +217,7 @@ class MovieFileInfo():
                  "download_filename": "movie_medium.mp4",
                  "mimetype": None,
                  "attachment": True,
+                 "attachment_filename": "{}_medium.mp4".format(self.get_id()),
                  "local_path": self.get_movie_medium_local_path(),
                     },
                 {"name": "movie",
@@ -205,6 +225,7 @@ class MovieFileInfo():
                  "download_filename": "movie.mp4",
                  "mimetype": None,
                  "attachment": True,
+                 "attachment_filename": "{}.mp4".format(self.get_id()),
                  "local_path": self.local_path,
                  "size": self.get_size()
                     },
@@ -216,7 +237,7 @@ class MovieFileInfo():
         return str(self.__dict__)
 
 
-def get_one_day_directory_name(dt):
+def _get_one_day_directory_name(dt):
     one_day = (dt.year, dt.month, dt.day)
     directory_name = '{}_{:0>2}{:0>2}'.format(*one_day)
     return directory_name
@@ -225,7 +246,8 @@ def _create_image_ref_data_execute(file_info_list_by_date):
     
     func_list = [
         lambda v: _create_image_jpg(v.local_path, v.get_jpg_local_path()),
-        lambda v: _create_image_thumbnail(v.get_jpg_local_path(), v.get_thumbnail_local_path()),
+        lambda v: _create_image_middle_jpg(v.get_jpg_local_path(), v.get_medium_local_path()),
+        lambda v: _create_image_small_jpg(v.get_medium_local_path(), v.get_thumbnail_local_path()),
         lambda v: _create_image_info(v.get_jpg_local_path(), v.get_info_local_path())
         ]    
             
@@ -265,19 +287,26 @@ def _create_image_jpg(input_file_path, output_file_path):
     import execute
     execute.arw_convert(input_file_path, output_file_path)
 
-def _create_image_thumbnail(input_file_path, output_file_path):
+
+def _create_image_small_jpg(input_file_path, output_file_path):
     from PIL import Image
     
     img = Image.open(input_file_path)
-    
-    print(img.format, img.size, img.mode)
-    # JPEG (512, 512) RGB
-    
     img.thumbnail((160, 160), Image.ANTIALIAS)
     
     utility.make_directory(output_file_path)
     img.save(output_file_path)
+
+
+def _create_image_middle_jpg(input_file_path, output_file_path):
+    from PIL import Image
     
+    img = Image.open(input_file_path)
+    img.resize((800, 800), Image.ANTIALIAS)
+    
+    utility.make_directory(output_file_path)
+    img.save(output_file_path)
+
 def _create_image_info(input_file_path, output_file_path):
     from PIL import Image
     from PIL.ExifTags import TAGS
@@ -377,6 +406,7 @@ def _create_info_file(file_info_list_by_date, cls):
 
 
 def _create_file_info_list(input_path, ext_list, cls):
+    
     file_path_list = utility.directory_walk(input_path, ext_list, None, 1)
     
     file_info_list = []
@@ -392,7 +422,7 @@ def _create_file_info_list(input_path, ext_list, cls):
     for file_info in sorted_file_info_list:
         dt = file_info.dt
         file_path = file_info.local_path
-        one_day = get_one_day_directory_name(dt)
+        one_day = _get_one_day_directory_name(dt)
         file_list = file_info_list_by_date.get(one_day, None)
         if file_list is None:
             file_list = []
@@ -415,7 +445,7 @@ def main():
     # pprint.pprint(file_info_list_by_date)
     if IS_CREATE_REF:
         _create_image_ref_data_execute(temp_image)
-        # _create_movie_ref_data_execute(temp_movie)
+        _create_movie_ref_data_execute(temp_movie)
         
         # __create_ref_data_execute(temp_movie)
     # print(file_list)

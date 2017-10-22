@@ -7,6 +7,7 @@ import flask
 import jinja2
 import json
 import config as cf
+import datetime
 
 ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
 INFO_FILE_NAME = "info.json"
@@ -124,7 +125,14 @@ def child_folder2(child_name1, child_name2):
     next_name = root_data_dict.get(index + 1, None)
     
     _add_info_for_web_all(child_name2, data_children)
-    text = flask.render_template("{}_index_test.html".format(child_name2), data_list=data_children, prev=prev_name, next=next_name)
+    
+    current_days = {"prev": prev_name, "current": child_name1, "next": next_name}
+    
+    text = flask.render_template("{}_index.html".format(child_name2),
+                                 data_list=data_children,
+                                 current_days=current_days,
+                                 media_type=child_name2,
+                                 datetime=datetime.datetime.utcnow())
     
     return text
 

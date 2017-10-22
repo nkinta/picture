@@ -7,6 +7,7 @@ div .wrapper {
 
 div .image {
 	padding: 5px;
+	cursor: hand;
 }
 
 a:hover {
@@ -19,6 +20,56 @@ a {
     font-weight: bold;
     display: inline-block;
 }
+
+div.top-menu {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+	background-color: #333;
+	margin: 0px;
+	padding: 0px;
+    z-index: 999;
+    width: 100%;
+    height: auto;
+}
+
+div.top-menu .media-movies {
+	background-color: #0068af;
+}
+
+div.top-menu .media-images {
+	background-color: #af1e00;
+}
+
+div.top-menu .days {
+	background-color: #333;
+}
+
+div.top-menu table {
+    position: obsolute;
+	margin: 0px;
+	padding: 0px;
+    width: 100%;
+    height: 100%;
+    list-style-type: none;
+}
+
+div.top-menu a {
+	color:#FFF;
+	padding: 10px;
+}
+
+div.image img {
+	width: 160px;
+	
+}
+
+/*
+div.top-menu ul li {
+    float: left;
+}
+*/
+
 
 /*
 swiper

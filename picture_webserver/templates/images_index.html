@@ -1,45 +1,57 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-<body>
+{% extends "images_index_test.html"%}
 
-<script
-  src="https://code.jquery.com/jquery-3.2.1.js"
-  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-  crossorigin="anonymous">
-</script>
-
-<hr>
-<a href="../">back</a>
-
-<div class="swiper-container">
+{% block contents %}
+<!-- Slider main container -->
+<div class="swiper-container" id="swiper-top">
     <!-- Additional required wrapper -->
     <div class="swiper-wrapper">
-		{% for data in data_list %}
-			{% set arw = data.web.arw %}
-			{% set thumbnail = data.web.thumbnail %}
-			{% set jpg = data.web.jpg %}
-			{% set exif_info = data.web.exif_info %}
-			<div class="swiper-slide">
-				<h3>{{ data.name }}</h3>
-			  	<ul>
-					<li>
-						<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}">download_{{ arw.name }}</a> - {{ arw.download_size }}
-					</li>
-					<li>
-						<a href="{{ data.path }}{{ exif_info.path }}{{ info.download_filename }}">download_{{ exif_info.name }}</a>
-					</li>
-					<li>
-						<a href="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}"><img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" /></a>
-					</li>
-				</ul>
+	{% for data in data_list %}
+		{% set arw = data.web.arw %}
+		{% set thumbnail = data.web.thumbnail %}
+		{% set jpg = data.web.jpg %}
+		{% set exif_info = data.web.exif_info %}
+		<div class="swiper-slide">
+			<h3>{{ data.name }}</h3>
+			<div>
+			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
+            <div class="swiper-lazy-preloader"></div>
+            </div>
+			<div>
+				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}" class="square_btn">DOWNLOAD RAW {{ arw.download_size }}</a>
 			</div>
-		{% endfor %}
+			<div>
+				<a class="square_btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
+			</div>
+		</div>
+	{% endfor %}
+    </div>
+<div class="swiper-pagination"></div>
+
+<div class="swiper-button-prev"></div>
+<div class="swiper-button-next"></div>
+</div>
+
+<hr>
+<div>
+    <!-- Additional required wrapper -->
+    <div class="wrapper">
+	{% for data in data_list %}
+		{% set arw = data.web.arw %}
+		{% set thumbnail = data.web.thumbnail %}
+		{% set jpg = data.web.jpg %}
+		{% set exif_info = data.web.exif_info %}
+		<div class="image">
+			<p>{{ data.name }}</p>
+			<div class="btn" data-index="{{ loop.index0 }}">
+				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+			</div>
+		</div>
+	{% endfor %}
     </div>
 </div>
-  <script>       
-  </script>
-  
-</body>
-</html>
+
+<div id="dialog" title="exif">
+  <p></p>
+</div>
+
+{% endblock %}

@@ -1,29 +1,52 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-<body>
+{% extends "images_index_test.html"%}
+
+{% block contents %}
+<!-- Slider main container -->
+<div class="swiper-container" id="swiper-top">
+    <!-- Additional required wrapper -->
+	<div class="swiper-wrapper">
+		{% for data in data_list %}
+			{% set thumbnail = data.web.thumbnail %}
+			{% set movie = data.web.movie %}
+			{% set movie_medium = data.web.movie_medium %}
+			{% set movie_small = data.web.movie_small %}
+			<div class="swiper-slide">
+			 	<h3>{{ data.name }}</h3>
+ 				<div><video controls poster="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" preload="none"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}"/></video></div>
+
+ 				<div><a class="square_btn" href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">DOWNLOAD ORIGINAL {{ movie.download_size }}</a></div>
+ 				<div><a class="square_btn" href="{{ data.path }}{{ movie_medium.path }}{{ movie_medium.download_filename }}">DOWNLOAD MIDIUM</a></div>
+ 				<div><a class="square_btn" href="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}">WATCH SMALL</a></div>
+
+			</div>
+		{% endfor %}
+	</div>
+<div class="swiper-pagination"></div>
+
+<div class="swiper-button-prev"></div>
+<div class="swiper-button-next"></div>
+</div>
 
 <hr>
-<a href="../">back</a>
 <div>
-{% for data in data_list %}
-	<div>
-	 	<h3>{{ data.name }}</h3>
-
-	 	{% for child_data in data.children %}
-	 		{% set thumbnail = data.web.thumbnail %}
-			{% set movie = data.web.movie %}
-			{% set movie_small = data.web.movie_small %}
-	 		<div>
-	 			<div><a href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">download_{{ movie.name }}</a> - {{ movie.download_size }}</div>
-	 			<div><a href="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}">watch</a></div>
-	 			<video controls width="320"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}" /></video>
-	 		</div>
-	 	{% endfor %}
+    <!-- Additional required wrapper -->
+    <div class="wrapper">
+	{% for data in data_list %}
+		{% set thumbnail = data.web.thumbnail %}
+		{% set movie = data.web.movie %}
+		{% set movie_small = data.web.movie_small %}
+		<div class="image">
+			<p>{{ data.name }}</p>
+			<div class="btn" data-index="{{ loop.index0 }}">
+				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+			</div>
 		</div>
-	</div>
-{% endfor %}
+	{% endfor %}
+    </div>
 </div>
-</body>
-</html>
+
+<div id="dialog" title="exif">
+  <p></p>
+</div>
+
+{% endblock %}

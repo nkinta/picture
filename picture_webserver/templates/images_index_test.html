@@ -1,48 +1,24 @@
 <html>
 <head>
+{% block head_define %}
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<link rel="stylesheet" href="../../../static/css/default.css?q=1027766">
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="../../../static/css/default.css?p={{datetime}}">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.css">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/js/swiper.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
 
-</head>
-<body>
-
-
-
-
+{% block head_script %}
 <script>
 
 const request = new XMLHttpRequest();
 
 function showInfoDialog(url) {
-	/*
-}
-	request.open("GET", url);
-	request.addEventListener("load", (event) => {
-	    if (event.target.status !== 200) {
-	        console.log("success");
-	        return;
-	    }
-	    console.log(event.target.status);
-	    var object = window.JSON.parse(event.target.responseText);
-	    console.log(object);
-	    
-	    var p = $( "#dialog p" )
-	    p.text(object.ISOSpeedRatings);
-	    $( function() {
-	        $( "#dialog" ).dialog();
-	      } );
-	    
-	});
-	request.send();
-	*/
-	
+
 	$.get(url).done(function(data) {
 	    console.log(data);
 	    var p = $("#dialog p")
@@ -64,86 +40,68 @@ $(function(){
 	    lazyLoading: true
 	});
 	
-	/*
-	 $('.square_btn[data-index]').on('click', function () {
+	 $('.btn[data-index]').on('click', function () {
 		 swiper.slideTo($(this).data('index'));
+		 var position = $("#swiper-top").offset().top;
+		 $("html,body").animate({
+			    scrollTop : position
+			}, {
+			    queue : false
+			});
 	});
-	*/
 	
 	 $('.square_btn[data-exif_info]').on('click', function () {
 		showInfoDialog($(this).data('exif_info'));
 	});
 
 });
-
-
 </script>
+{% endblock %}
 
+</head>
+<body>
 
-<a href="../">BACK</a>
-<hr>
-{% if prev %}
-<a href="../../{{ prev }}/images">PREV</a>
-{% endif %}
-{% if next %}
-<a href="../../{{ next }}/images">NEXT</a>
-{% endif %}
+{% block head_menu %}
+<div class="top-menu">
+<table class="media-{{media_type}}">
+<tr>
+<td style="text-align: center">
+<a href="../movies">{{current_days.current}} {{media_type|upper}}</a>
+</td>
+</tr>
+</table>
 
-<!-- Slider main container -->
-<div class="swiper-container" >
-    <!-- Additional required wrapper -->
-    <div class="swiper-wrapper">
-	{% for data in data_list %}
-		{% set arw = data.web.arw %}
-		{% set thumbnail = data.web.thumbnail %}
-		{% set jpg = data.web.jpg %}
-		{% set exif_info = data.web.exif_info %}
-		<div class="swiper-slide">
-			<h3>{{ data.name }}</h3>
-			<div>
-			<img data-src="{{ data.path }}{{ jpg.path }}{{ jpg.download_filename }}" class="swiper-lazy">
-            <div class="swiper-lazy-preloader"></div>
-            </div>
-			<div>
-				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}" class="square_btn">DOWNLOAD RAW {{ arw.download_size }}</a>
-			</div>
-			<div>
-				<a class="square_btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
-			</div>
-		</div>
-	{% endfor %}
-    </div>
-<div class="swiper-pagination"></div>
-
-<div class="swiper-button-prev"></div>
-<div class="swiper-button-next"></div>
+<table class="days">
+<tr>
+<td>
+	{% if current_days.prev %}
+	<a href="../../{{ current_days.prev }}/images">PREV_DAY</a>
+	{% else %}
+	<a href="./">PREV_DAY</a>
+	{% endif %}
+</td>
+<td style="text-align: center">
+	<a href="/">HOME</a>
+</td>
+<td style="text-align: right">
+	{% if current_days.next %}
+	<a href="../../{{ current_days.next }}/images">NEXT_DAY</a>
+	{% else %}
+	<a href="./">NEXT_DAY</a>
+	{% endif %}
+</td>
+</tr>
+</table>
 </div>
+<br/>
+<br/>
+<br/>
+<hr/>
+{% endblock %}
 
-<hr>
-<div>
-    <!-- Additional required wrapper -->
-    <div class="wrapper">
-	{% for data in data_list %}
-		{% set arw = data.web.arw %}
-		{% set thumbnail = data.web.thumbnail %}
-		{% set jpg = data.web.jpg %}
-		{% set exif_info = data.web.exif_info %}
-		<div class="image">
-			<p>{{ data.name }}</p>
-			<div class="btn" data-index="{{ loop.index0 }}">
-				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
-			</div>
-		</div>
-	{% endfor %}
-    </div>
-</div>
-  <script>       
-  </script>
-
-<div id="dialog" title="exif">
-  <p></p>
-</div>
- 
+{% block contents %}
+nodata
+{% endblock %}
 
 </body>
 </html>

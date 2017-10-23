@@ -11,17 +11,18 @@
 		{% set jpg = data.web.jpg %}
 		{% set jpg_medium = data.web.jpg_medium %}
 		{% set exif_info = data.web.exif_info %}
-		<div class="swiper-slide">
+		<div class="swiper-slide" dataname="{{ data.name }}">
 			<h3>{{ data.name }}</h3>
 			<div>
 				<img data-src="{{ data.path }}{{ jpg_medium.path }}{{ jpg_medium.download_filename }}" class="swiper-lazy">
             <div class="swiper-lazy-preloader"></div>
+            <div class="star-btn"><div class="star-icon-checked" style="display: none">&#x2605;</div><div class="star-icon-unchecked">&#x2606;</div></div>
             </div>
 			<div>
-				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}" class="square_btn">DOWNLOAD RAW {{ arw.download_size }}</a>
+				<a href="{{ data.path }}{{ arw.path }}{{ arw.download_filename }}" class="square-btn">DOWNLOAD RAW {{ arw.download_size }}</a>
 			</div>
 			<div>
-				<a class="square_btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
+				<a class="square-btn" data-exif_info="{{ data.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
 			</div>
 		</div>
 	{% endfor %}
@@ -34,7 +35,7 @@
 
 <hr>
 <div>
-	<a class="square_btn" href="./jpg.zip">DOWNLOAD ALL</a>
+	<a class="square-btn" href="./jpg.zip">DOWNLOAD ALL</a>
 </div>
 <div>
     <!-- Additional required wrapper -->

@@ -100,7 +100,7 @@ swiper
 button
 */
 
-.square_btn{
+.square-btn{
     position: relative;
     border-radius: 4px;
     display: inline-block;
@@ -112,6 +112,22 @@ button
     cursor: hand;
     margin: 0.25em
   }
+
+.star-btn {
+	cursor: hand;
+}
+
+.star-icon-checked {
+	font-weight: bold;
+	font-size: 200%;
+    color: #FFE200;
+}
+
+.star-icon-unchecked {
+	font-weight: bold;
+	font-size: 200%;
+    color: #FFE200;
+}
 
 /*
 .square_btn_backup{

@@ -15,12 +15,26 @@
 {% block head_script %}
 <script>
 
-const request = new XMLHttpRequest();
+// const request = new XMLHttpRequest();
+$.put = function(url, data, callback, type){
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'PUT',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
 
 function showInfoDialog(url) {
 
 	$.get(url).done(function(data) {
-	    console.log(data);
 	    var p = $("#dialog p")
 	    p.text(data.ISOSpeedRatings);
 	    $( function() {
@@ -50,9 +64,22 @@ $(function(){
 			});
 	});
 	
-	 $('.square_btn[data-exif_info]').on('click', function () {
+	 $('.square-btn[data-exif_info]').on('click', function () {
 		showInfoDialog($(this).data('exif_info'));
 	});
+	 
+	 $('.star-btn').on('click', function () {
+		 var checkedIcon = $(this).children('.star-icon-checked');
+		 checkedIcon.toggle();
+		 $(this).children('.star-icon-unchecked').toggle();
+		 
+		 var checkedFlag = checkedIcon.is(':visible');
+		 
+		 var parent = $(this).parent().parent();
+		 var dataname = parent.attr("dataname");
+		 $.put("./" + dataname, {"favorite": checkedFlag});
+	});
+	 
 
 });
 </script>

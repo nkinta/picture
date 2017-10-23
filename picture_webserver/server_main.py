@@ -164,6 +164,16 @@ def all_zip(child_name1, child_name2, filename):
     
     return download_file_info
 
+@app.route("/<child_name1>/<child_name2>/<child_name3>", methods=['PUT'])
+def data_info_put(child_name1, child_name2, child_name3):
+    
+    root_data = _get_info_data()
+    data, _ = _get_data(root_data, [child_name1, child_name2, child_name3])
+    favorite = flask.request.form['favorite']
+    print("favorite", data, favorite)
+    
+    return ""
+
 
 @app.route("/<child_name1>/<child_name2>/<child_name3>/<child_name4>/<path:filename>")
 def child_data2(child_name1, child_name2, child_name3, child_name4, filename):

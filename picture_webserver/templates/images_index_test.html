@@ -77,7 +77,7 @@ $(function(){
 		 
 		 var parent = $(this).parent().parent();
 		 var dataname = parent.attr("dataname");
-		 $.put("./" + dataname, {"favorite": checkedFlag});
+		 $.put("./" + dataname + "/", {"favorite": checkedFlag});
 	});
 	 
 

@@ -7,6 +7,7 @@ import datetime
 import pprint
 import utility
 import json
+import itertools
 
 import config as cf
 
@@ -405,9 +406,13 @@ def _create_info_file(file_info_list_by_date, cls):
             fp.write(write_data)
 
 
-def _create_file_info_list(input_path, ext_list, cls):
+def _create_file_info_list(input_path_list, ext_list, cls):
     
-    file_path_list = utility.directory_walk(input_path, ext_list, None, 1)
+    file_path_list_list = []
+    for input_path in input_path_list:
+        file_path_list_list.append(utility.directory_walk(input_path, ext_list, None, 1))
+        
+    file_path_list = itertools.chain.from_iterable(file_path_list_list)
     
     file_info_list = []
     
@@ -436,10 +441,10 @@ def _create_file_info_list(input_path, ext_list, cls):
 def main():
 
     # file_info_list_by_date = _create_file_info_list(cf.MOVIE_INPUT_PATH, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
-    temp_image = _create_file_info_list(cf.IMAGE_INPUT_PATH, (".ARW", ".arw"), ImageFileInfo)
+    temp_image = _create_file_info_list(cf.IMAGE_INPUT_PATH_LIST, (".ARW", ".arw"), ImageFileInfo)
     _create_info_file(temp_image, ImageFileInfo)
     
-    temp_movie = _create_file_info_list(cf.MOVIE_INPUT_PATH, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
+    temp_movie = _create_file_info_list(cf.MOVIE_INPUT_PATH_LIST, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
     _create_info_file(temp_movie, MovieFileInfo)
     
     # pprint.pprint(file_info_list_by_date)

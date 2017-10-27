@@ -20,6 +20,7 @@ FFMPEG = "FFMPEG"
 THUMBNAIL_DEPOT = os.path.join(cf.OUTPUT_PATH, "thumbnail_depot")
 
 WEB_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
+FAV_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "fav_root")
 
 INFO_FILE_NAME = "info.json"
 
@@ -27,10 +28,21 @@ LOCAL_DEPOT_PATH = os.path.join(cf.OUTPUT_PATH, "depot")
 
 IS_CREATE_REF = True
 
+
 class JsonEncoder(json.JSONEncoder):
+
     def default(self, o):
         if hasattr(o, "to_json"):
             return o.to_json()
+       
+        return json.JSONEncoder.default(self, o)
+
+
+class FavJsonEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if hasattr(o, "to_fav_json"):
+            return o.to_fav_json()
        
         return json.JSONEncoder.default(self, o)
 
@@ -48,13 +60,22 @@ class FolderInfo():
     def get_path(self):
         return os.path.join(".", self.name)
 
-    def to_json(self):
+    def get_name(self):
+        return self.name
+
+    def __to_json_common(self):
         result = {
             "name": self.name,
             "path": "{}/".format(self.get_path().replace("\\", "/")),
             "children_info_path": "{}/".format(self.get_path().replace("\\", "/")),
                   }
         return result
+
+    def to_json(self):
+        return self.__to_json_common()
+    
+    def to_fav_json(self):
+        return self.__to_json_common()
 
 
 class ImageFileInfo():
@@ -149,6 +170,14 @@ class ImageFileInfo():
         }
         return result
 
+    def to_fav_json(self):
+        result = {
+            "name": self.get_name(),
+            "path": "{}/".format(self.get_path().replace("\\", "/")),
+            "children": [],
+            }
+        return result
+
 class MovieFileInfo():
     
     @classmethod
@@ -232,6 +261,14 @@ class MovieFileInfo():
                     },
             ]
         }
+        return result
+    
+    def to_fav_json(self):
+        result = {
+            "name": self.get_name(),
+            "path": "{}/".format(self.get_path().replace("\\", "/")),
+            "children": [],
+            }
         return result
     
     def __repr__(self):
@@ -379,29 +416,38 @@ def _create_movie_thumbnail(input_file_path, output_file_path):
     
     utility.create_process(command, call_back, 1, 20)()
 
-def _create_info_file(file_info_list_by_date, cls):
 
-    output_file_path = os.path.join(WEB_ROOT_PATH, INFO_FILE_NAME)
+def _create_info_file_all(file_info_list_by_date, cls):
+    
+    _create_info_file(WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
+    _create_info_file(FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
+    
+    
+
+
+def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):
+
+    output_file_path = os.path.join(root_path, INFO_FILE_NAME)
     
     utility.make_directory(output_file_path)
     date_list = [FolderInfo(v) for v, _ in file_info_list_by_date.items()]
-    write_data = json.dumps(date_list, cls=JsonEncoder, indent="  ", )
+    write_data = json.dumps(date_list, cls=json_encoder, indent="  ", )
     with open(output_file_path, "w") as fp:
         fp.write(write_data)
 
     for one_day, file_info_list in file_info_list_by_date.items():
 
-        output_file_path = os.path.join(WEB_ROOT_PATH, one_day, cls.get_directory_name(), INFO_FILE_NAME)
+        output_file_path = os.path.join(root_path, one_day, cls.get_directory_name(), INFO_FILE_NAME)
         utility.make_directory(output_file_path)
-        write_data = json.dumps(file_info_list, cls=JsonEncoder, indent="  ",)
+        write_data = json.dumps(file_info_list, cls=json_encoder, indent="  ",)
         with open(output_file_path, "w") as fp:
             fp.write(write_data)
 
-    for root, dirs, files in os.walk(WEB_ROOT_PATH):
+    for root, dirs, files in os.walk(root_path):
         if not dirs:
             continue
         folder_list = [FolderInfo(os.path.basename(v)) for v in dirs]
-        write_data = json.dumps(folder_list, cls=JsonEncoder, indent="  ",)
+        write_data = json.dumps(folder_list, cls=json_encoder, indent="  ",)
         with open(os.path.join(root, INFO_FILE_NAME), "w") as fp:
             fp.write(write_data)
 
@@ -442,10 +488,10 @@ def main():
 
     # file_info_list_by_date = _create_file_info_list(cf.MOVIE_INPUT_PATH, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
     temp_image = _create_file_info_list(cf.IMAGE_INPUT_PATH_LIST, (".ARW", ".arw"), ImageFileInfo)
-    _create_info_file(temp_image, ImageFileInfo)
+    _create_info_file_all(temp_image, ImageFileInfo)
     
     temp_movie = _create_file_info_list(cf.MOVIE_INPUT_PATH_LIST, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
-    _create_info_file(temp_movie, MovieFileInfo)
+    _create_info_file_all(temp_movie, MovieFileInfo)
     
     # pprint.pprint(file_info_list_by_date)
     if IS_CREATE_REF:

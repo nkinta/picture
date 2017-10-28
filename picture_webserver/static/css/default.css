@@ -64,6 +64,15 @@ div.image img {
 	
 }
 
+div.back {
+    padding: 10px;
+}
+
+ul.date-index li {
+    list-style-type: none;
+    padding: 10px;
+}
+
 /*
 div.top-menu ul li {
     float: left;

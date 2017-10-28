@@ -51,7 +51,9 @@ $(function(){
 	var swiper = new Swiper('.swiper-container', {
 	    preloadImages: false,
 	    // Enable lazy loading
-	    lazyLoading: true
+	    lazyLoading: true,
+	    nextButton: '.swiper-button-next',
+	    prevButton: '.swiper-button-prev',
 	});
 	
 	 $('.btn[data-index]').on('click', function () {
@@ -93,7 +95,7 @@ $(function(){
 <table class="media-{{media_type}}">
 <tr>
 <td style="text-align: center">
-<a href="../{{inverse_media_type}}">{{current_days.current}} GOTO {{inverse_media_type|upper}}</a>
+<a href="../{{inverse_media_type}}">{{current_days.current}} {{media_type|upper}}</a>
 </td>
 </tr>
 </table>

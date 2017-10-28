@@ -228,7 +228,9 @@ def child_folder1(date_uri):
     root_data = _get_info_data()
     _, data_children, _ = _get_data(root_data, [date_uri])
 
-    text = flask.render_template("directory_index.html", data_list=data_children)
+    text = flask.render_template("directory_index.html",
+                                 data_list=data_children,
+                                 datetime=datetime.datetime.utcnow())
     
     return text
 
@@ -238,7 +240,10 @@ def root_folder():
     
     data = _get_info_data()
 
-    text = flask.render_template("directory_index.html", data_list=data)
+    text = flask.render_template("directory_index.html",
+                                 data_list=data,
+                                 datetime=datetime.datetime.utcnow()
+                                 )
     return text
 
 

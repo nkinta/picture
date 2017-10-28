@@ -11,4 +11,8 @@ IMAGE_INPUT_PATH_LIST = [r"D:\movie_workspace\image_web_sample\strage",]
 
 OUTPUT_PATH = r"D:\web_servert_test"
 
+WEB_ROOT_PATH = os.path.join(OUTPUT_PATH, "web_root")
+
+FAV_ROOT_PATH = os.path.join(OUTPUT_PATH, "fav_root")
+
 FFMPEG_PATH = r"D:\movie_workspace\ffmpeg\bin\ffmpeg.exe"

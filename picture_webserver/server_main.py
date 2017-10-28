@@ -11,9 +11,6 @@ import datetime
 import zipfile
 from werkzeug.routing import BaseConverter
 
-WEB_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
-FAV_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "fav_root")
-
 RESPONSE_PATH = os.path.join(cf.OUTPUT_PATH, "response_root")
 
 INFO_FILE_NAME = "info.json"
@@ -45,13 +42,26 @@ app.url_map.converters['regex'] = RegexConverter
 # template = jinja2_env.get_template("index.html")
 # os.environ["FLASK_DEBUG"] = "1"
 
-def _get_info_data(root_path=WEB_ROOT_PATH, relative_path="./"):
+FILE_CACHE_DICT = {}
+
+def _get_info_data(root_path=cf.WEB_ROOT_PATH, relative_path="./"):
     info_path = os.path.join(root_path, relative_path.replace("/", os.path.sep), INFO_FILE_NAME)
 
+    norm_path = os.path.normpath(info_path)
+    
+    # read from cache
+    data = FILE_CACHE_DICT.get(norm_path, None)
+    if data:
+        return data
+    
     with open(info_path, "r") as fp:
         read_data = fp.read()
         
     data = json.loads(read_data)
+    
+    # cache
+    FILE_CACHE_DICT[norm_path] = data
+    
     return data
 
 def _get_serialize_func(relative_path, data_children, root_path):
@@ -62,7 +72,7 @@ def _get_serialize_func(relative_path, data_children, root_path):
     return temp_func
 
 
-def _get_data(data_children, child_name_list, root_path=WEB_ROOT_PATH):
+def _get_data(data_children, child_name_list, root_path=cf.WEB_ROOT_PATH):
     
     parent_path = ""
 
@@ -144,8 +154,8 @@ def child_data2(date_uri, media_type_uri, media_data_uri, media_data_type_uri, d
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, MEDIA_DATA_REGEX, "")), methods=['PUT'])
 def data_info_put(date_uri, media_type_uri, media_data_uri):
     
-    root_data = _get_info_data(FAV_ROOT_PATH)
-    data, _, serialize_func = _get_data(root_data, [date_uri, media_type_uri, media_data_uri], FAV_ROOT_PATH) # media_data_uri
+    root_data = _get_info_data(cf.FAV_ROOT_PATH)
+    data, _, serialize_func = _get_data(root_data, [date_uri, media_type_uri, media_data_uri], cf.FAV_ROOT_PATH) # media_data_uri
     favorite = flask.request.form['favorite']
     
     data["favorite"] = favorite
@@ -200,10 +210,13 @@ def child_folder2(date_uri, media_type_uri):
     
     current_days = {"prev": prev_name, "current": date_uri, "next": next_name}
     
+    inverse_media_type = {"images": "movies", "movies": "images"}[media_type_uri]
+    
     text = flask.render_template("{}_index.html".format(media_type_uri),
                                  data_list=data_children,
                                  current_days=current_days,
                                  media_type=media_type_uri,
+                                 inverse_media_type=inverse_media_type,
                                  datetime=datetime.datetime.utcnow())
     
     return text

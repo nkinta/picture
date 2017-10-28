@@ -19,9 +19,6 @@ FFMPEG = "FFMPEG"
 
 THUMBNAIL_DEPOT = os.path.join(cf.OUTPUT_PATH, "thumbnail_depot")
 
-WEB_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "web_root")
-FAV_ROOT_PATH = os.path.join(cf.OUTPUT_PATH, "fav_root")
-
 INFO_FILE_NAME = "info.json"
 
 LOCAL_DEPOT_PATH = os.path.join(cf.OUTPUT_PATH, "depot")
@@ -419,8 +416,8 @@ def _create_movie_thumbnail(input_file_path, output_file_path):
 
 def _create_info_file_all(file_info_list_by_date, cls):
     
-    _create_info_file(WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
-    _create_info_file(FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
+    _create_info_file(cf.WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
+    _create_info_file(cf.FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
     
     
 

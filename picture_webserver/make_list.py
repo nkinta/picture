@@ -2,12 +2,14 @@
 from __future__ import print_function
 
 import os
-import http.server
 import datetime
 import pprint
 import utility
 import json
 import itertools
+
+import image_converter as ic
+import movie_converter as mc
 
 import config as cf
 
@@ -25,7 +27,6 @@ LOCAL_DEPOT_PATH = os.path.join(cf.OUTPUT_PATH, "depot")
 
 IS_CREATE_REF = True
 
-
 class JsonEncoder(json.JSONEncoder):
 
     def default(self, o):
@@ -42,12 +43,12 @@ class FavJsonEncoder(json.JSONEncoder):
             return o.to_fav_json()
        
         return json.JSONEncoder.default(self, o)
-
 #vJSON_ENCODER = json.JSONEncoder(default=json_enc_default)
 
 
 class Error(Exception):
     pass
+
 
 class FolderInfo():
         
@@ -280,10 +281,10 @@ def _get_one_day_directory_name(dt):
 def _create_image_ref_data_execute(file_info_list_by_date):
     
     func_list = [
-        lambda v: _create_image_jpg(v.local_path, v.get_jpg_local_path()),
-        lambda v: _create_image_middle_jpg(v.get_jpg_local_path(), v.get_medium_local_path()),
-        lambda v: _create_image_small_jpg(v.get_medium_local_path(), v.get_thumbnail_local_path()),
-        lambda v: _create_image_info(v.get_jpg_local_path(), v.get_info_local_path())
+        lambda v: ic.create_image_jpg(v.local_path, v.get_jpg_local_path()),
+        lambda v: ic.create_image_middle_jpg(v.get_jpg_local_path(), v.get_medium_local_path()),
+        lambda v: ic.create_image_small_jpg(v.get_medium_local_path(), v.get_thumbnail_local_path()),
+        lambda v: ic.create_image_info(v.get_jpg_local_path(), v.get_info_local_path())
         ]    
             
     for func in func_list:
@@ -294,9 +295,9 @@ def _create_image_ref_data_execute(file_info_list_by_date):
 def _create_movie_ref_data_execute(file_info_list_by_date):
 
     func_list = [
-        lambda v: _create_movie_small("1920", "4000k", "128k", v.local_path, v.get_movie_medium_local_path(FFMPEG)),
-        lambda v: _create_movie_small("960", "400k", "64k", v.get_movie_medium_local_path(FFMPEG), v.get_movie_small_local_path(FFMPEG)),
-        lambda v: _create_movie_thumbnail(v.get_movie_small_local_path(FFMPEG), v.get_thumbnail_local_path(FFMPEG)),
+        lambda v: mc.create_movie_small("1920", "4000k", "128k", v.local_path, v.get_movie_medium_local_path(FFMPEG)),
+        lambda v: mc.create_movie_small("960", "400k", "64k", v.get_movie_medium_local_path(FFMPEG), v.get_movie_small_local_path(FFMPEG)),
+        lambda v: mc.create_movie_thumbnail(v.get_movie_small_local_path(FFMPEG), v.get_thumbnail_local_path(FFMPEG)),
         ]
     for func in func_list:
         for one_day, file_info_list in file_info_list_by_date.items():
@@ -318,109 +319,11 @@ def _create_movie_ref_data_execute(file_info_list_by_date):
     """
 
 
-def _create_image_jpg(input_file_path, output_file_path):
-    import execute
-    execute.arw_convert(input_file_path, output_file_path)
-
-
-def _create_image_small_jpg(input_file_path, output_file_path):
-    from PIL import Image
-    
-    img = Image.open(input_file_path)
-    img.thumbnail((160, 160), Image.ANTIALIAS)
-    
-    utility.make_directory(output_file_path)
-    img.save(output_file_path)
-
-
-def _create_image_middle_jpg(input_file_path, output_file_path):
-    from PIL import Image
-    
-    img = Image.open(input_file_path)
-    img.resize((800, 800), Image.ANTIALIAS)
-    
-    utility.make_directory(output_file_path)
-    img.save(output_file_path)
-
-def _create_image_info(input_file_path, output_file_path):
-    from PIL import Image
-    from PIL.ExifTags import TAGS
-    
-    img = Image.open(input_file_path)
-    exif_dict = img._getexif()
-    
-    exif_result_info = {}
-    for tag_id, value in exif_dict.items():
-        tag = TAGS.get(tag_id, tag_id)
-        if isinstance(value, bytes):
-            continue
-        exif_result_info[tag] = value
-    # print(tag_dict)
-    """
-    exif_result_info = {}
-    for k, v in exif_dict.items():
-        tag_value = jpeg_tag_dict.get(k, None)
-        if tag_value:
-            tag_name = tag_value[0]
-            exif_result_info[tag_name] = v
-    """
-
-    utility.make_directory(output_file_path)
-    write_data = json.dumps(exif_result_info, cls=JsonEncoder, indent="  ", )
-    with open(output_file_path, "w") as fp:
-        fp.write(write_data)
-    
-    # pprint.pprint(exif_dict)
-    # execute.arw_convert(input_file_path, output_file_path)
-
-def _create_movie_small(size, bv, ba, input_file_path, output_file_path):
-
-    if os.path.isfile(output_file_path):
-        return
-
-    utility.make_directory(output_file_path)
-
-    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path,
-               "-movflags", "faststart",
-               "-c:v", "libx264", # libx265 # libx264 # mpeg2 # libxvid
-               "-vf", "scale={}:-1".format(size),
-                "-b:v", bv,
-                "-c:a", "aac",
-                # "-acodec aac -strict experimental"
-                "-b:a", ba,
-               output_file_path)
-    print(command)
-    
-    def call_back(returncode, stdout_message):
-        print(returncode, stdout_message)
-        pass
-    
-    utility.create_process(command, call_back, 1, 2400)()
-
-def _create_movie_thumbnail(input_file_path, output_file_path):
-
-    if os.path.isdir(os.path.dirname(output_file_path)):
-        return
-        
-    utility.make_directory(output_file_path)
-    
-    command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf",  "fps=1/10,scale=480:-1", output_file_path)
-    print(command)
-    
-    def call_back(returncode, stdout_message):
-        print(returncode, stdout_message)
-        pass
-    
-    utility.create_process(command, call_back, 1, 20)()
-
-
 def _create_info_file_all(file_info_list_by_date, cls):
     
     _create_info_file(cf.WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
     _create_info_file(cf.FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
     
-    
-
 
 def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):
 
@@ -494,7 +397,8 @@ def main():
     if IS_CREATE_REF:
         _create_image_ref_data_execute(temp_image)
         _create_movie_ref_data_execute(temp_movie)
-        
+    
+    print("end")
         # __create_ref_data_execute(temp_movie)
     # print(file_list)
     

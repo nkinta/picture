@@ -27,12 +27,13 @@ LOCAL_DEPOT_PATH = os.path.join(cf.OUTPUT_PATH, "depot")
 
 IS_CREATE_REF = True
 
+
 class JsonEncoder(json.JSONEncoder):
 
     def default(self, o):
         if hasattr(o, "to_json"):
             return o.to_json()
-       
+
         return json.JSONEncoder.default(self, o)
 
 
@@ -41,7 +42,7 @@ class FavJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if hasattr(o, "to_fav_json"):
             return o.to_fav_json()
-       
+
         return json.JSONEncoder.default(self, o)
 #vJSON_ENCODER = json.JSONEncoder(default=json_enc_default)
 
@@ -51,10 +52,10 @@ class Error(Exception):
 
 
 class FolderInfo():
-        
+
     def __init__(self, name):
         self.name = name
-            
+
     def get_path(self):
         return os.path.join(".", self.name)
 
@@ -66,22 +67,22 @@ class FolderInfo():
             "name": self.name,
             "path": "{}/".format(self.get_path().replace("\\", "/")),
             "children_info_path": "{}/".format(self.get_path().replace("\\", "/")),
-                  }
+        }
         return result
 
     def to_json(self):
         return self.__to_json_common()
-    
+
     def to_fav_json(self):
         return self.__to_json_common()
 
 
 class ImageFileInfo():
-    
+
     @classmethod
     def get_directory_name(cls):
         return "images"
-    
+
     def __init__(self, dt, local_path):
         self.dt = dt
         self.local_path = local_path
@@ -122,7 +123,6 @@ class ImageFileInfo():
         result_path = "{}{}".format(temp_path, ".jpg")
         return result_path
 
-
     def to_json(self):
         result = {
             # "id": self.get_id(),
@@ -138,14 +138,14 @@ class ImageFileInfo():
                  "attachment_filename": "{}.arw".format(self.get_id()),
                  "local_path": self.local_path,
                  "size": self.get_size()
-                    },
+                 },
                 {"name": "jpg",
                  "path": "jpg/",
                  "download_filename": "picture.jpg",
                  "mimetype": "image/jpeg",
                  "attachment_filename": "{}.jpg".format(self.get_id()),
                  "local_path": self.get_jpg_local_path(),
-                    },
+                 },
                 {"name": "jpg_medium",
                  "path": "jpg_medium/",
                  "download_filename": "picture_medium.jpg",
@@ -173,33 +173,34 @@ class ImageFileInfo():
             "name": self.get_name(),
             "path": "{}/".format(self.get_path().replace("\\", "/")),
             "children": [],
-            }
+        }
         return result
 
+
 class MovieFileInfo():
-    
+
     @classmethod
     def get_directory_name(cls):
         return "movies"
-    
+
     def __init__(self, dt, local_path):
         self.dt = dt
         self.local_path = local_path
-    
+
     def get_id(self):
         basename = self.get_name()
         # dirname = os.path.basename(os.path.dirname(self.local_path))
         dirname = _get_one_day_directory_name(self.dt)
         id = "{}_{}".format(dirname, basename)
         return id
-    
+
     def get_path(self):
         return os.path.join(".", self.get_name())
-    
+
     def get_name(self):
         name = os.path.basename(os.path.splitext(self.local_path)[0])
         return name
-    
+
     def get_thumbnail_local_path(self, type=DEFAULT):
         directory_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "thumbnail", *(self.get_id().split("_")))
         if type == DEFAULT:
@@ -216,10 +217,10 @@ class MovieFileInfo():
         temp_path = os.path.join(LOCAL_DEPOT_PATH, self.get_directory_name(), "movie_medium", *(self.get_id().split("_")))
         result_path = "{}{}".format(temp_path, ".mp4")
         return result_path
-    
+
     def get_size(self):
         return os.path.getsize(self.local_path)
-    
+
     def to_json(self):
         result = {
             # "id": self.get_id(),
@@ -239,7 +240,7 @@ class MovieFileInfo():
                  "mimetype": "video/mp4",
                  "attachment_filename": "{}_small.mp4".format(self.get_id()),
                  "local_path": self.get_movie_small_local_path(),
-                    },
+                 },
                 {"name": "movie_medium",
                  "path": "movie_medium/",
                  "download_filename": "movie_medium.mp4",
@@ -247,7 +248,7 @@ class MovieFileInfo():
                  "attachment": True,
                  "attachment_filename": "{}_medium.mp4".format(self.get_id()),
                  "local_path": self.get_movie_medium_local_path(),
-                    },
+                 },
                 {"name": "movie",
                  "path": "movie/",
                  "download_filename": "movie.mp4",
@@ -256,19 +257,19 @@ class MovieFileInfo():
                  "attachment_filename": "{}.mp4".format(self.get_id()),
                  "local_path": self.local_path,
                  "size": self.get_size()
-                    },
+                 },
             ]
         }
         return result
-    
+
     def to_fav_json(self):
         result = {
             "name": self.get_name(),
             "path": "{}/".format(self.get_path().replace("\\", "/")),
             "children": [],
-            }
+        }
         return result
-    
+
     def __repr__(self):
         return str(self.__dict__)
 
@@ -278,32 +279,35 @@ def _get_one_day_directory_name(dt):
     directory_name = '{}_{:0>2}{:0>2}'.format(*one_day)
     return directory_name
 
+
 def _create_image_ref_data_execute(file_info_list_by_date):
-    
+
     func_list = [
         lambda v: ic.create_image_jpg(v.local_path, v.get_jpg_local_path()),
         lambda v: ic.create_image_middle_jpg(v.get_jpg_local_path(), v.get_medium_local_path()),
         lambda v: ic.create_image_small_jpg(v.get_medium_local_path(), v.get_thumbnail_local_path()),
         lambda v: ic.create_image_info(v.get_jpg_local_path(), v.get_info_local_path())
-        ]    
-            
+    ]
+
     for func in func_list:
         for one_day, file_info_list in file_info_list_by_date.items():
             for file_info in file_info_list:
                 func(file_info)
             # return
+
+
 def _create_movie_ref_data_execute(file_info_list_by_date):
 
     func_list = [
         lambda v: mc.create_movie_small("1920", "4000k", "128k", v.local_path, v.get_movie_medium_local_path(FFMPEG)),
         lambda v: mc.create_movie_small("960", "400k", "64k", v.get_movie_medium_local_path(FFMPEG), v.get_movie_small_local_path(FFMPEG)),
         lambda v: mc.create_movie_thumbnail(v.get_movie_small_local_path(FFMPEG), v.get_thumbnail_local_path(FFMPEG)),
-        ]
+    ]
     for func in func_list:
         for one_day, file_info_list in file_info_list_by_date.items():
             for file_info in file_info_list:
                 func(file_info)
-            
+
     """
     for one_day, file_info_list in file_info_list_by_date.items():
         for file_info in file_info_list:
@@ -320,15 +324,15 @@ def _create_movie_ref_data_execute(file_info_list_by_date):
 
 
 def _create_info_file_all(file_info_list_by_date, cls):
-    
+
     _create_info_file(cf.WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
     _create_info_file(cf.FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
-    
+
 
 def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):
 
     output_file_path = os.path.join(root_path, INFO_FILE_NAME)
-    
+
     utility.make_directory(output_file_path)
     date_list = [FolderInfo(v) for v, _ in file_info_list_by_date.items()]
     write_data = json.dumps(date_list, cls=json_encoder, indent="  ", )
@@ -353,22 +357,22 @@ def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):
 
 
 def _create_file_info_list(input_path_list, ext_list, cls):
-    
+
     file_path_list_list = []
     for input_path in input_path_list:
         file_path_list_list.append(utility.directory_walk(input_path, ext_list, None, 1))
-        
+
     file_path_list = itertools.chain.from_iterable(file_path_list_list)
-    
+
     file_info_list = []
-    
+
     for file_path in file_path_list:
         dt = datetime.datetime.fromtimestamp(os.stat(file_path).st_mtime)
         print(file_path, dt.strftime('%Y%m%d%H%M'))
         file_info_list.append(cls(dt, file_path))
-        
-    sorted_file_info_list = sorted(file_info_list, key=lambda v:v.dt)
-    
+
+    sorted_file_info_list = sorted(file_info_list, key=lambda v: v.dt)
+
     file_info_list_by_date = {}
     for file_info in sorted_file_info_list:
         dt = file_info.dt
@@ -378,9 +382,9 @@ def _create_file_info_list(input_path_list, ext_list, cls):
         if file_list is None:
             file_list = []
             file_info_list_by_date[one_day] = file_list
-        
+
         file_list.append(file_info)
-        
+
     return file_info_list_by_date
 
 
@@ -389,19 +393,18 @@ def main():
     # file_info_list_by_date = _create_file_info_list(cf.MOVIE_INPUT_PATH, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
     temp_image = _create_file_info_list(cf.IMAGE_INPUT_PATH_LIST, (".ARW", ".arw"), ImageFileInfo)
     _create_info_file_all(temp_image, ImageFileInfo)
-    
-    temp_movie = _create_file_info_list(cf.MOVIE_INPUT_PATH_LIST, (".MP4", ".mp4"), MovieFileInfo) # (".MP4", ".mp4")
+
+    temp_movie = _create_file_info_list(cf.MOVIE_INPUT_PATH_LIST, (".MP4", ".mp4"), MovieFileInfo)  # (".MP4", ".mp4")
     _create_info_file_all(temp_movie, MovieFileInfo)
-    
+
     # pprint.pprint(file_info_list_by_date)
     if IS_CREATE_REF:
         _create_image_ref_data_execute(temp_image)
         _create_movie_ref_data_execute(temp_movie)
-    
+
     print("end")
-        # __create_ref_data_execute(temp_movie)
+    # __create_ref_data_execute(temp_movie)
     # print(file_list)
-    
 
 
 if __name__ == "__main__":

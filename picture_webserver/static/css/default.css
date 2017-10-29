@@ -5,9 +5,14 @@ div .wrapper {
   flex-wrap: wrap;
 }
 
-div .image {
+div.image {
 	padding: 5px;
 	cursor: hand;
+}
+
+div.image p{
+	color: #747474;
+    width: 100%;
 }
 
 a:hover {

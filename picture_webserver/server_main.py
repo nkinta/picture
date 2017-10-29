@@ -6,10 +6,12 @@ import http.server
 import flask
 import jinja2
 import json
-import config as cf
+
 import datetime
 import zipfile
 from werkzeug.routing import BaseConverter
+
+from . import config as cf
 
 RESPONSE_PATH = os.path.join(cf.OUTPUT_PATH, "response_root")
 

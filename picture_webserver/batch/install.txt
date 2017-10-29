@@ -1,0 +1,7 @@
+pip install pypiwin32
+pip install flask
+pip install Pillow
+
+
+sc delete "FlaskApp"
+

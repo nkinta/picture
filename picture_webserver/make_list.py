@@ -8,10 +8,10 @@ import utility
 import json
 import itertools
 
-from . import image_converter as ic
-from . import movie_converter as mc
+from picture_webserver import image_converter as ic
+from picture_webserver import movie_converter as mc
 
-from . import config as cf
+from picture_webserver import config as cf
 
 # import define
 # jpeg_tag_dict = {v[2] : v for v in define.tag_list}

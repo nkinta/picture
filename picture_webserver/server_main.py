@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import os
-import http.server
 import flask
 import jinja2
 import json
@@ -11,7 +10,7 @@ import datetime
 import zipfile
 from werkzeug.routing import BaseConverter
 
-from . import config as cf
+from picture_webserver import config as cf
 
 RESPONSE_PATH = os.path.join(cf.OUTPUT_PATH, "response_root")
 

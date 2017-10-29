@@ -8,7 +8,7 @@ from PIL import Image
 from PIL import ExifTags
 
 import execute
-import config as cf
+from . import config as cf
 
 class JsonEncoder(json.JSONEncoder):
 

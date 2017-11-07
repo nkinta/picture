@@ -31,8 +31,7 @@ class AppServerSvc(win32serviceutil.ServiceFramework):
         self.main()
 
     def main(self):
-        pass
-        # server_main.app.run(host = '0.0.0.0', threaded=True, port=8080)
+        server_main.app.run(host='0.0.0.0', threaded=True, port=8080)
 
 if __name__ == '__main__':
     win32serviceutil.HandleCommandLine(AppServerSvc)

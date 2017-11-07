@@ -3,5 +3,14 @@ pip install flask
 pip install Pillow
 
 
+サービス関係
 sc delete "FlaskApp"
+システムの詳細設定
+イベント ビューアー
+
+PYTHONPATH C:\Users\%username%\Documents\git\picture
+PATH
+C:\Program Files\Python36\
+C:\Program Files\Python36\Scripts\
+C:\Program Files\Python36\Lib\site-packages\pypiwin32_system32\
 

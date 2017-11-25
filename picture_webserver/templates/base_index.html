@@ -76,10 +76,12 @@ $(function(){
 		 $(this).children('.star-icon-unchecked').toggle();
 		 
 		 var checkedFlag = checkedIcon.is(':visible');
-		 
 		 var parent = $(this).parent().parent();
 		 var dataname = parent.attr("dataname");
 		 $.put("./" + dataname + "/", {"favorite": checkedFlag});
+		 
+		 $('#thumbnail_' + dataname).children('.btn').children('.star-icon-thumbnail').toggle();
+		 
 	});
 	 
 

@@ -5,12 +5,13 @@ div .wrapper {
   flex-wrap: wrap;
 }
 
-div.image {
+div.thumbnail-image {
 	padding: 5px;
 	cursor: hand;
+	position: relative;
 }
 
-div.image p{
+div.thumbnail-image p{
 	color: #747474;
     width: 100%;
 }
@@ -64,7 +65,7 @@ div.top-menu a {
 	padding: 10px;
 }
 
-div.image img {
+div.thumbnail-image img {
 	width: 160px;
 	
 }
@@ -129,6 +130,14 @@ button
 
 .star-btn {
 	cursor: hand;
+}
+
+.star-icon-thumbnail {
+    position: absolute;
+	font-weight: bold;
+	font-size: 200%;
+	bottom: 0px;
+    color: #FFE200;
 }
 
 .star-icon-checked {

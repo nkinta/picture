@@ -59,7 +59,7 @@ def _get_info_data(root_path=cf.WEB_ROOT_PATH, relative_path="./"):
     if data:
         return data
 
-    with open(info_path, "r") as fp:
+    with open(norm_path, "r") as fp:
         read_data = fp.read()
 
     data = json.loads(read_data)
@@ -128,6 +128,23 @@ def _add_info_for_web_all(data_type, data_list):
         if children is None:
             continue
         data["web"] = _add_info_for_web(data_type, children)
+
+
+def _combine_data_children(data_children_list):
+    data_dict = {}
+    for root_name, data_children in data_children_list:
+        for data_child in data_children:
+            print("data_child", data_child)
+
+            name = data_child["name"]
+            if name not in data_dict:
+                data_dict[name] = {root_name: data_child}
+            else:
+                data_dict[name][root_name] = data_child
+
+    result_list = [v for _, v in data_dict.items()]
+
+    return result_list
 
 
 @app.route('/favicon.ico')
@@ -207,6 +224,9 @@ def child_folder2(date_uri, media_type_uri):
     root_data = _get_info_data()
     data, data_children, _ = _get_data(root_data, [date_uri, media_type_uri])
 
+    fav_root_data = _get_info_data(cf.FAV_ROOT_PATH)
+    _, fav_data_children, _ = _get_data(fav_root_data, [date_uri, media_type_uri], cf.FAV_ROOT_PATH)
+
     index = {v["name"]: i for i, v in enumerate(root_data)}[date_uri]
     root_data_dict = {i: v["name"] for i, v in enumerate(root_data)}
 
@@ -219,8 +239,10 @@ def child_folder2(date_uri, media_type_uri):
 
     inverse_media_type = {"images": "movies", "movies": "images"}[media_type_uri]
 
+    combined_data_children = _combine_data_children([("main", data_children), ("fav", fav_data_children)])
+
     text = flask.render_template("{}_index.html".format(media_type_uri),
-                                 data_list=data_children,
+                                 data_list=combined_data_children,
                                  current_days=current_days,
                                  media_type=media_type_uri,
                                  inverse_media_type=inverse_media_type,

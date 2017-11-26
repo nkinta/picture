@@ -17,14 +17,17 @@
 			<h3>{{ main.name }}</h3>
 			<div>
 				<img data-src="{{ main.path }}{{ jpg_medium.path }}{{ jpg_medium.download_filename }}" class="swiper-lazy">
-            <div class="swiper-lazy-preloader"></div>
-            <div class="star-btn">
-            	{%- if fav.favorite == "true" -%}
-           		<div class="star-icon-checked" >&#x2605;</div><div class="star-icon-unchecked" style="display: none">&#x2606;</div>
-            	{%- else -%}
-            	<div class="star-icon-checked" style="display: none">&#x2605;</div><div class="star-icon-unchecked">&#x2606;</div>
-             	{%- endif -%}
-            </div>
+	            <div class="swiper-lazy-preloader"></div>
+	            <div class="star-btn">
+	            	{%- if fav.favorite == "true" -%}
+						{%- set checked_favorite_display = "" -%}
+						{%- set unchecked_favorite_display = "display: none" -%}
+					{%- else -%}
+						{%- set checked_favorite_display = "display: none" -%}
+						{%- set unchecked_favorite_display = "" -%}
+	            	{%- endif -%}
+	           		<div class="star-icon-checked" style="{{checked_favorite_display}}">&#x2605;</div><div class="star-icon-unchecked" style="{{unchecked_favorite_display}}">&#x2606;</div>
+	            </div>
             </div>
 			<div>
 				<a href="{{ main.path }}{{ arw.path }}{{ arw.download_filename }}" class="square-btn">DOWNLOAD RAW {{ arw.download_size }}</a>

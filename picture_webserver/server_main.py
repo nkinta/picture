@@ -78,9 +78,12 @@ def _get_serialize_func(relative_path, data_children, root_path):
     return temp_func
 
 
-def _get_data(data_children, child_name_list, root_path=cf.WEB_ROOT_PATH):
+def _get_data(child_name_list, root_path=cf.WEB_ROOT_PATH):
 
-    parent_path = ""
+    data = None
+    parent_path = root_path
+    data_children = _get_info_data(root_path)
+    serialize_func = _get_serialize_func(parent_path, data_children, root_path)
 
     for child_name in child_name_list:
         print(child_name)
@@ -156,8 +159,7 @@ def favicon():
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, MEDIA_DATA_REGEX, MEDIA_DATA_TYPE_REGEX, DOWNLOAD_FILE_REGEX)))
 def child_data2(date_uri, media_type_uri, media_data_uri, media_data_type_uri, download_file_uri):
 
-    root_data = _get_info_data()
-    data, _, _ = _get_data(root_data, [date_uri, media_type_uri, media_data_uri, media_data_type_uri])
+    data, _, _ = _get_data([date_uri, media_type_uri, media_data_uri, media_data_type_uri])
 
     local_path = data["local_path"]
     mimetype = data["mimetype"]  # ("mimetype", None)
@@ -177,8 +179,7 @@ def child_data2(date_uri, media_type_uri, media_data_uri, media_data_type_uri, d
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, MEDIA_DATA_REGEX, "")), methods=['PUT'])
 def data_info_put(date_uri, media_type_uri, media_data_uri):
 
-    root_data = _get_info_data(cf.FAV_ROOT_PATH)
-    data, _, serialize_func = _get_data(root_data, [date_uri, media_type_uri, media_data_uri], cf.FAV_ROOT_PATH)  # media_data_uri
+    data, _, serialize_func = _get_data([date_uri, media_type_uri, media_data_uri], cf.FAV_ROOT_PATH)  # media_data_uri
     favorite = flask.request.form['favorite']
 
     data["favorite"] = favorite
@@ -190,12 +191,11 @@ def data_info_put(date_uri, media_type_uri, media_data_uri):
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, DOWNLOAD_FILE_REGEX)))
 def all_zip(date_uri, media_type_uri, download_file_uri):
 
-    root_data = _get_info_data()
-    data, data_children, _ = _get_data(root_data, [date_uri, media_type_uri])
+    data, data_children, _ = _get_data([date_uri, media_type_uri])
 
     file_info_list = []
     for data_child in data_children:
-        target_data, _, _ = _get_data(root_data, [date_uri, media_type_uri, data_child["name"], os.path.splitext(download_file_uri)[0]])
+        target_data, _, _ = _get_data([date_uri, media_type_uri, data_child["name"], os.path.splitext(download_file_uri)[0]])
         local_path = target_data["local_path"]
         attachment_filename = target_data["attachment_filename"]
         file_info_list.append((local_path, attachment_filename))
@@ -221,14 +221,13 @@ def all_zip(date_uri, media_type_uri, download_file_uri):
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, "")))
 def child_folder2(date_uri, media_type_uri):
 
-    root_data = _get_info_data()
-    data, data_children, _ = _get_data(root_data, [date_uri, media_type_uri])
+    data, data_children, _ = _get_data([date_uri, media_type_uri])
+    _, fav_data_children, _ = _get_data([date_uri, media_type_uri], cf.FAV_ROOT_PATH)
 
-    fav_root_data = _get_info_data(cf.FAV_ROOT_PATH)
-    _, fav_data_children, _ = _get_data(fav_root_data, [date_uri, media_type_uri], cf.FAV_ROOT_PATH)
+    _, root_data_children, _ = _get_data([])
 
-    index = {v["name"]: i for i, v in enumerate(root_data)}[date_uri]
-    root_data_dict = {i: v["name"] for i, v in enumerate(root_data)}
+    index = {v["name"]: i for i, v in enumerate(root_data_children)}[date_uri]
+    root_data_dict = {i: v["name"] for i, v in enumerate(root_data_children)}
 
     prev_name = root_data_dict.get(index - 1, None)
     next_name = root_data_dict.get(index + 1, None)
@@ -254,8 +253,7 @@ def child_folder2(date_uri, media_type_uri):
 @app.route("/".join(("", DATE_REGEX, "")))
 def child_folder1(date_uri):
 
-    root_data = _get_info_data()
-    _, data_children, _ = _get_data(root_data, [date_uri])
+    _, data_children, _ = _get_data([date_uri])
 
     text = flask.render_template("directory_index.html",
                                  data_list=data_children,
@@ -268,7 +266,6 @@ def child_folder1(date_uri):
 def root_folder():
 
     data = _get_info_data()
-
     text = flask.render_template("directory_index.html",
                                  data_list=data,
                                  datetime=datetime.datetime.utcnow()

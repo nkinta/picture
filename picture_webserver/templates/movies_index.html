@@ -6,20 +6,32 @@
     <!-- Additional required wrapper -->
 	<div class="swiper-wrapper">
 		{% for data in data_list %}
-			{% set thumbnail = data.web.thumbnail %}
-			{% set movie = data.web.movie %}
-			{% set movie_medium = data.web.movie_medium %}
-			{% set movie_small = data.web.movie_small %}
-			<div class="swiper-slide" dataname="{{ data.name }}">
-			 	<h3>{{ data.name }}</h3>
+			{%- set main = data.main -%}
+			{%- set fav = data.fav -%}
+			{%- set thumbnail = main.web.thumbnail -%}
+			{%- set movie = main.web.movie -%}
+			{%- set movie_medium = main.web.movie_medium -%}
+			{%- set movie_small = main.web.movie_small -%}
+			<div class="swiper-slide" dataname="{{ main.name }}">
+			 	<h3>{{ main.name }}</h3>
  				<div>
- 					<video controls poster="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" preload="none"><source src="{{ data.path }}{{ movie_small.path }}{{ movie_small.download_filename }}"/></video>
+ 					<video controls poster="{{ main.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" preload="none"><source src="{{ main.path }}{{ movie_small.path }}{{ movie_small.download_filename }}"/></video>
+		            <div class="star-btn">
+		            	{%- if fav.favorite == "true" -%}
+							{%- set checked_favorite_display = "" -%}
+							{%- set unchecked_favorite_display = "display: none" -%}
+						{%- else -%}
+							{%- set checked_favorite_display = "display: none" -%}
+							{%- set unchecked_favorite_display = "" -%}
+		            	{%- endif -%}
+		           		<div class="star-icon-checked" style="{{checked_favorite_display}}">&#x2605;</div><div class="star-icon-unchecked" style="{{unchecked_favorite_display}}">&#x2606;</div>
+		            </div>
  				</div>
  				<div>
- 					<a class="square-btn" href="{{ data.path }}{{ movie.path }}{{ movie.download_filename }}">DOWNLOAD ORIGINAL {{ movie.download_size }}</a>
+ 					<a class="square-btn" href="{{ main.path }}{{ movie.path }}{{ movie.download_filename }}">DOWNLOAD ORIGINAL {{ movie.download_size }}</a>
  				</div>
  				<div>
- 					<a class="square-btn" href="{{ data.path }}{{ movie_medium.path }}{{ movie_medium.download_filename }}">DOWNLOAD MIDIUM</a>
+ 					<a class="square-btn" href="{{ main.path }}{{ movie_medium.path }}{{ movie_medium.download_filename }}">DOWNLOAD MIDIUM</a>
  				</div>
 			</div>
 		{% endfor %}
@@ -38,13 +50,21 @@
     <!-- Additional required wrapper -->
     <div class="wrapper">
 	{% for data in data_list %}
-		{% set thumbnail = data.web.thumbnail %}
-		{% set movie = data.web.movie %}
-		{% set movie_small = data.web.movie_small %}
-		<div class="image">
-			<p>{{ data.name }}</p>
+		{%- set main = data.main -%}
+		{%- set fav = data.fav -%}
+		{%- set thumbnail = main.web.thumbnail -%}
+		{%- set movie = main.web.movie -%}
+		{%- set movie_small = main.web.movie_small -%}
+		<div class="thumbnail-image" id="thumbnail_{{ main.name }}">
+			<p>{{ main.name }}</p>
 			<div class="btn" data-index="{{ loop.index0 }}">
-				<img src="{{ data.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+				<img src="{{ main.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+            	{%- if fav.favorite == "true" -%}
+					{%- set favorite_display = "" -%}
+				{%- else -%}
+					{%- set favorite_display = "display: none" -%}
+            	{%- endif -%}
+           		<div class="star-icon-thumbnail" style="{{favorite_display}}">&#x2605;</div>
 			</div>
 		</div>
 	{% endfor %}

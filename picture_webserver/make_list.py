@@ -11,11 +11,7 @@ import itertools
 from picture_webserver import image_converter as ic
 from picture_webserver import movie_converter as mc
 
-import socket
-host = socket.gethostname()
-cf = __import__("config_{}".format(host.lower()))
-
-# from picture_webserver import config as cf
+from picture_webserver.config import *
 
 # import define
 # jpeg_tag_dict = {v[2] : v for v in define.tag_list}

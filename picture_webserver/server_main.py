@@ -10,7 +10,7 @@ import datetime
 import zipfile
 from werkzeug.routing import BaseConverter
 
-from picture_webserver import config as cf
+from picture_webserver.config import *
 
 RESPONSE_PATH = os.path.join(cf.OUTPUT_PATH, "response_root")
 

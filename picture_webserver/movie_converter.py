@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import utility
 
-from picture_webserver import config as cf
+from picture_webserver.config import *
 
 
 def create_movie_small(size, bv, ba, input_file_path, output_file_path):

@@ -11,7 +11,7 @@ IMAGE_INPUT_PATH_LIST = [r"D:\movie_workspace\image_web_sample\strage", ]
 
 """
 
-MOVIE_INPUT_PATH_LIST = [(r"D:\movie_workspace\image_web_sample\movie_strage", r".+(?:(?:goprohero6_[0-9]{2})|(?:a7s2movie_xavc_[0-9]{2})|(?:a7s2movie_xavc_[0-9]{2}))\\.+\.\w+$"),
+MOVIE_INPUT_PATH_LIST = [(r"D:\movie_workspace\image_web_sample\movie_strage", r".+(?:(?:goprohero6_[0-9]{2})|(?:goprohero6_[0-9]{2}))\\.+\.\w+$"),
                          ]
 
 IMAGE_INPUT_PATH_LIST = []

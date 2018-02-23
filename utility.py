@@ -59,13 +59,13 @@ def directory_walk(input_dirpath, exts, filtering=None, hierarchy=None):
 
         print("directory walking :%s, %s" % (root, temp_hierarchy))
         for file in files:
+            fullpath = os.path.join(root, file)
             if program:
-                if not program.match(file):
+                if not program.match(fullpath):
                     continue
 
             filename, ext = os.path.splitext(file)
             if (exts is None) or (ext in exts):
-                fullpath = os.path.join(root, file)
                 filepathlist.append(fullpath)
             else:
                 continue

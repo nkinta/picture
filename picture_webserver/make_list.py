@@ -11,7 +11,11 @@ import itertools
 from picture_webserver import image_converter as ic
 from picture_webserver import movie_converter as mc
 
-from picture_webserver import config as cf
+import socket
+host = socket.gethostname()
+cf = __import__("config_{}".format(host.lower()))
+
+# from picture_webserver import config as cf
 
 # import define
 # jpeg_tag_dict = {v[2] : v for v in define.tag_list}
@@ -24,6 +28,8 @@ THUMBNAIL_DEPOT = os.path.join(cf.OUTPUT_PATH, "thumbnail_depot")
 INFO_FILE_NAME = "info.json"
 
 LOCAL_DEPOT_PATH = os.path.join(cf.OUTPUT_PATH, "depot")
+STOP_FILE_PATH = os.path.join(LOCAL_DEPOT_PATH, "stop.txt")
+START_FILE_PATH = os.path.join(LOCAL_DEPOT_PATH, "start.txt")
 
 IS_CREATE_REF = True
 
@@ -274,6 +280,32 @@ class MovieFileInfo():
         return str(self.__dict__)
 
 
+def is_stop_process():
+    if os.path.isfile(STOP_FILE_PATH):
+        return True
+    else:
+        return False
+
+
+def stop_process():
+    if os.path.isfile(START_FILE_PATH):
+        os.rename(START_FILE_PATH, STOP_FILE_PATH)
+
+
+def start_process():
+    if os.path.isfile(STOP_FILE_PATH):
+        os.rename(STOP_FILE_PATH, START_FILE_PATH)
+
+
+def toggle_process():
+    if is_stop_process():
+        print("start")
+        start_process()
+    else:
+        print("stop")
+        stop_process()
+
+
 def _get_one_day_directory_name(dt):
     one_day = (dt.year, dt.month, dt.day)
     directory_name = '{}_{:0>2}{:0>2}'.format(*one_day)
@@ -290,8 +322,14 @@ def _create_image_ref_data_execute(file_info_list_by_date):
     ]
 
     for func in func_list:
+        if is_stop_process():
+            continue
         for one_day, file_info_list in file_info_list_by_date.items():
+            if is_stop_process():
+                continue
             for file_info in file_info_list:
+                if is_stop_process():
+                    continue
                 func(file_info)
             # return
 
@@ -304,8 +342,14 @@ def _create_movie_ref_data_execute(file_info_list_by_date):
         lambda v: mc.create_movie_thumbnail(v.get_movie_small_local_path(FFMPEG), v.get_thumbnail_local_path(FFMPEG)),
     ]
     for func in func_list:
+        if is_stop_process():
+            continue
         for one_day, file_info_list in file_info_list_by_date.items():
+            if is_stop_process():
+                continue
             for file_info in file_info_list:
+                if is_stop_process():
+                    continue
                 func(file_info)
 
     """
@@ -359,8 +403,9 @@ def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):
 def _create_file_info_list(input_path_list, ext_list, cls):
 
     file_path_list_list = []
-    for input_path in input_path_list:
-        file_path_list_list.append(utility.directory_walk(input_path, ext_list, None, 1))
+    for input_path_info in input_path_list:
+        input_path, filtering = input_path_info
+        file_path_list_list.append(utility.directory_walk(input_path, ext_list, filtering, 2))
 
     file_path_list = itertools.chain.from_iterable(file_path_list_list)
 

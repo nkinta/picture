@@ -18,7 +18,7 @@ INFO_FILE_NAME = "info.json"
 
 DATE_REGEX = "<regex('20[0-9]{2}_[0-9]{4}'):date_uri>"
 MEDIA_TYPE_REGEX = "<regex('(?:(?:images)|(?:movies))'):media_type_uri>"
-MEDIA_DATA_REGEX = "<regex('(?:(?:DSC[0-9]{5})|(?:C[0-9]{4}))'):media_data_uri>"
+MEDIA_DATA_REGEX = "<regex('(?:(?:DSC[0-9]{5})|(?:C[0-9]{4})|(?:GH[0-9]{6})|(?:MAH[0-9]{5}))'):media_data_uri>"
 MEDIA_DATA_TYPE_REGEX = "<media_data_type_uri>"
 DOWNLOAD_FILE_REGEX = "<download_file_uri>"
 

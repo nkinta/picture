@@ -8,6 +8,8 @@ import json
 
 import datetime
 import zipfile
+import collections
+
 from werkzeug.routing import BaseConverter
 
 from picture_webserver.config import *
@@ -78,6 +80,17 @@ def _get_serialize_func(relative_path, data_children, root_path):
     return temp_func
 
 
+def _get_and_combine_data(child_name_list):
+
+    _, data_children, _ = _get_data(child_name_list)
+    _, fav_data_children, _ = _get_data(child_name_list, cf.FAV_ROOT_PATH)
+    _, access_data_children, _ = _get_data(child_name_list, cf.ACCESS_ROOT_PATH)
+
+    _combine_data_children([("main", data_children), ("fav", fav_data_children), ("access", access_data_children)])
+
+    return data_children
+
+
 def _get_data(child_name_list, root_path=cf.WEB_ROOT_PATH):
 
     data = None
@@ -133,21 +146,24 @@ def _add_info_for_web_all(data_type, data_list):
         data["web"] = _add_info_for_web(data_type, children)
 
 
+def _user_filtering(combined_data_children):
+    user = flask.request.args.get('user')
+    if (user != "admin"):
+        combined_data_children = [v for v in combined_data_children if v["access"].get("users", True) == True]
+
+    return combined_data_children
+
+
 def _combine_data_children(data_children_list):
-    data_dict = {}
-    for root_name, data_children in data_children_list:
-        for data_child in data_children:
-            print("data_child", data_child)
+    _, base_data_children = data_children_list[0]
+    base_data_children_dict = {v["name"]: v for v in base_data_children}
+    for root_name, data_children in data_children_list[1:]:
+        data_children_dict = {v["name"]: v for v in data_children}
+        for name, v in data_children_dict.items():
+            print("data_child", v)
 
-            name = data_child["name"]
-            if name not in data_dict:
-                data_dict[name] = {root_name: data_child}
-            else:
-                data_dict[name][root_name] = data_child
-
-    result_list = [v for _, v in data_dict.items()]
-
-    return result_list
+            if name in base_data_children_dict:
+                base_data_children_dict[name][root_name] = v
 
 
 @app.route('/favicon.ico')
@@ -179,11 +195,15 @@ def child_data2(date_uri, media_type_uri, media_data_uri, media_data_type_uri, d
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, MEDIA_DATA_REGEX, "")), methods=['PUT'])
 def data_info_put(date_uri, media_type_uri, media_data_uri):
 
-    data, _, serialize_func = _get_data([date_uri, media_type_uri, media_data_uri], cf.FAV_ROOT_PATH)  # media_data_uri
-    favorite = flask.request.form['favorite']
+    for v in (('favorite', cf.FAV_ROOT_PATH), ('users', cf.ACCESS_ROOT_PATH),):
+        key, path = v
+        data, _, serialize_func = _get_data([date_uri, media_type_uri, media_data_uri], path)  # media_data_uri
 
-    data["favorite"] = favorite
-    serialize_func()
+        if key in flask.request.form:
+            v = flask.request.form[key]
+            data[key] = v
+
+        serialize_func()
 
     return ""
 
@@ -221,8 +241,7 @@ def all_zip(date_uri, media_type_uri, download_file_uri):
 @app.route("/".join(("", DATE_REGEX, MEDIA_TYPE_REGEX, "")))
 def child_folder2(date_uri, media_type_uri):
 
-    data, data_children, _ = _get_data([date_uri, media_type_uri])
-    _, fav_data_children, _ = _get_data([date_uri, media_type_uri], cf.FAV_ROOT_PATH)
+    combined_data_children = _get_and_combine_data([date_uri, media_type_uri])
 
     _, root_data_children, _ = _get_data([])
 
@@ -232,18 +251,19 @@ def child_folder2(date_uri, media_type_uri):
     prev_name = root_data_dict.get(index - 1, None)
     next_name = root_data_dict.get(index + 1, None)
 
-    _add_info_for_web_all(media_type_uri, data_children)
+    _add_info_for_web_all(media_type_uri, combined_data_children)
 
     current_days = {"prev": prev_name, "current": date_uri, "next": next_name}
 
     inverse_media_type = {"images": "movies", "movies": "images"}[media_type_uri]
 
-    combined_data_children = _combine_data_children([("main", data_children), ("fav", fav_data_children)])
+    filtered_combined_data_children = _user_filtering(combined_data_children)
 
     text = flask.render_template("{}_index.html".format(media_type_uri),
-                                 data_list=combined_data_children,
+                                 data_list=filtered_combined_data_children,
                                  current_days=current_days,
                                  media_type=media_type_uri,
+                                 # user=user,
                                  inverse_media_type=inverse_media_type,
                                  datetime=datetime.datetime.utcnow())
 

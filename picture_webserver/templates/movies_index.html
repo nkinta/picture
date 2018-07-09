@@ -6,7 +6,7 @@
     <!-- Additional required wrapper -->
 	<div class="swiper-wrapper">
 		{% for data in data_list %}
-			{%- set main = data.main -%}
+			{%- set main = data -%}
 			{%- set fav = data.fav -%}
 			{%- set thumbnail = main.web.thumbnail -%}
 			{%- set movie = main.web.movie -%}
@@ -50,7 +50,7 @@
     <!-- Additional required wrapper -->
     <div class="wrapper">
 	{% for data in data_list %}
-		{%- set main = data.main -%}
+		{%- set main = data -%}
 		{%- set fav = data.fav -%}
 		{%- set thumbnail = main.web.thumbnail -%}
 		{%- set movie = main.web.movie -%}

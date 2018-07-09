@@ -81,9 +81,22 @@ $(function(){
 		 $.put("./" + dataname + "/", {"favorite": checkedFlag});
 		 
 		 $('#thumbnail_' + dataname).children('.btn').children('.star-icon-thumbnail').toggle();
-		 
+
 	});
-	 
+	
+	 $('.access-btn').on('click', function () {
+		 var checkedIcon = $(this).children('.access-icon-checked');
+		 checkedIcon.toggle();
+		 $(this).children('.access-icon-unchecked').toggle();
+		 
+		 var checkedFlag = checkedIcon.is(':visible');
+		 var parent = $(this).parent().parent();
+		 var dataname = parent.attr("dataname");
+		 $.put("./" + dataname + "/", {"users": checkedFlag});
+		 
+		 $('#thumbnail_' + dataname).children('.btn').children('.access-icon-thumbnail').toggle();
+
+	});
 
 });
 </script>

@@ -6,8 +6,9 @@
     <!-- Additional required wrapper -->
     <div class="swiper-wrapper">
 	{% for data in data_list %}
-		{%- set main = data.main -%}
+		{%- set main = data -%}
 		{%- set fav = data.fav -%}
+		{%- set access = data.access -%}
 		{%- set arw = main.web.arw -%}
 		{%- set thumbnail = main.web.thumbnail -%}
 		{%- set jpg = main.web.jpg -%}
@@ -20,13 +21,23 @@
 	            <div class="swiper-lazy-preloader"></div>
 	            <div class="star-btn">
 	            	{%- if fav.favorite == "true" -%}
-						{%- set checked_favorite_display = "" -%}
-						{%- set unchecked_favorite_display = "display: none" -%}
+						{%- set checked_display = "" -%}
+						{%- set unchecked_display = "display: none" -%}
 					{%- else -%}
-						{%- set checked_favorite_display = "display: none" -%}
-						{%- set unchecked_favorite_display = "" -%}
+						{%- set checked_display = "display: none" -%}
+						{%- set unchecked_display = "" -%}
 	            	{%- endif -%}
-	           		<div class="star-icon-checked" style="{{checked_favorite_display}}">&#x2605;</div><div class="star-icon-unchecked" style="{{unchecked_favorite_display}}">&#x2606;</div>
+	           		<div class="star-icon-checked" style="{{checked_display}}">&#x2605;</div><div class="star-icon-unchecked" style="{{unchecked_display}}">&#x2606;</div>
+	            </div>
+	            <div class="access-btn">
+	            	{%- if access.users == "true" -%}
+						{%- set checked_display = "" -%}
+						{%- set unchecked_display = "display: none" -%}
+					{%- else -%}
+						{%- set checked_display = "display: none" -%}
+						{%- set unchecked_display = "" -%}
+	            	{%- endif -%}
+	           		<div class="access-icon-checked" style="{{checked_display}}">EVERYONE</div><div class="access-icon-unchecked" style="{{unchecked_display}}">DENY</div>
 	            </div>
             </div>
 			<div>
@@ -52,8 +63,9 @@
     <!-- Additional required wrapper -->
     <div class="wrapper">
 	{% for data in data_list %}
-		{%- set main = data.main -%}
+		{%- set main = data -%}
 		{%- set fav = data.fav -%}
+		{%- set access = data.access -%}
 		{%- set arw = main.web.arw -%}
 		{%- set thumbnail = main.web.thumbnail -%}
 		{%- set jpg = main.web.jpg -%}
@@ -61,14 +73,21 @@
 		<div class="thumbnail-image" id="thumbnail_{{ main.name }}">
 			<p>{{ main.name }}</p>
 			<div class="btn" data-index="{{ loop.index0 }}">
+
 				<img src="{{ main.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
             	{%- if fav.favorite == "true" -%}
-					{%- set favorite_display = "" -%}
+					{%- set display = "" -%}
 				{%- else -%}
-					{%- set favorite_display = "display: none" -%}
+					{%- set display = "display: none" -%}
             	{%- endif -%}
-           		<div class="star-icon-thumbnail" style="{{favorite_display}}">&#x2605;</div>
-
+           		<div class="star-icon-thumbnail" style="{{display}}">&#x2605;</div>
+           		
+            	{%- if access.users == "true" -%}
+					{%- set display = "" -%}
+				{%- else -%}
+					{%- set display = "display: none" -%}
+            	{%- endif -%}
+           		<div class="access-icon-thumbnail" style="{{display}}">E</div>
 			</div>
 		</div>
 	{% endfor %}

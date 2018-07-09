@@ -152,6 +152,31 @@ button
     color: #FFE200;
 }
 
+.access-btn {
+	cursor: hand;
+}
+
+.access-icon-thumbnail {
+    position: absolute;
+	font-weight: bold;
+	font-size: 200%;
+	bottom: 0px;
+    color: #FFE200;
+}
+
+.access-icon-checked {
+	font-weight: bold;
+	font-size: 200%;
+    color: #FFE200;
+}
+
+.access-icon-unchecked {
+	font-weight: bold;
+	font-size: 200%;
+    color: #FFE200;
+}
+
+
 /*
 .square_btn_backup{
     position: relative;

@@ -36,4 +36,6 @@ WEB_ROOT_PATH = os.path.join(OUTPUT_PATH, "web_root")
 
 FAV_ROOT_PATH = os.path.join(OUTPUT_PATH, "fav_root")
 
+ACCESS_ROOT_PATH = os.path.join(OUTPUT_PATH, "access_root")
+
 FFMPEG_PATH = r"D:\movie_workspace\ffmpeg\bin\ffmpeg.exe"

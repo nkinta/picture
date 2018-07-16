@@ -84,10 +84,6 @@ def _get_serialize_func(relative_path, data_children, root_path):
 
 def _get_and_combine_data(child_name_list):
 
-    # _, data_children, _ = _get_data(child_name_list)
-    # _, fav_data_children, _ = _get_data(child_name_list, cf.FAV_ROOT_PATH)
-    # _, access_data_children, _ = _get_data(child_name_list, cf.ACCESS_ROOT_PATH)
-
     combine_list = []
     for root_path, tag in ROOT_PATH_LIST:
         result = _get_data(child_name_list, root_path)
@@ -262,6 +258,8 @@ def all_zip(date_uri, media_type_uri, download_file_uri):
 
     file_info_list = []
     for data_child in data_children:
+        if not _is_access(data_child):
+            continue
         target_data, _ = _get_and_combine_data([date_uri, media_type_uri, data_child["name"], os.path.splitext(download_file_uri)[0]])
         local_path = target_data["local_path"]
         attachment_filename = target_data["attachment_filename"]
@@ -310,7 +308,8 @@ def child_folder2(date_uri, media_type_uri):
                                  data_list=filtered_combined_data_children,
                                  current_days=current_days,
                                  media_type=media_type_uri,
-                                 # user=user,
+                                 query_string=flask.request.query_string.decode(),
+                                 user=flask.request.args.get("user", None),
                                  inverse_media_type=inverse_media_type,
                                  datetime=datetime.datetime.utcnow())
 

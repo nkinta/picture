@@ -132,11 +132,15 @@ button
 	cursor: hand;
 }
 
-.star-icon-thumbnail {
+.icon-thumbnail {
     position: absolute;
+	bottom: 0px;
+}
+
+.star-icon-thumbnail {
 	font-weight: bold;
 	font-size: 200%;
-	bottom: 0px;
+
     color: #FFE200;
 }
 
@@ -157,10 +161,8 @@ button
 }
 
 .access-icon-thumbnail {
-    position: absolute;
 	font-weight: bold;
 	font-size: 200%;
-	bottom: 0px;
     color: #FFE200;
 }
 

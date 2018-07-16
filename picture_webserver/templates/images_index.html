@@ -16,8 +16,8 @@
 		{%- set exif_info = main.web.exif_info -%}
 		<div class="swiper-slide" dataname="{{ main.name }}">
 			<h3>{{ main.name }}</h3>
-			<div>
-				<img data-src="{{ main.path }}{{ jpg_medium.path }}{{ jpg_medium.download_filename }}" class="swiper-lazy">
+			<div class="swiper">
+				<img data-src="{{ main.path }}{{ jpg_medium.path }}{{ jpg_medium.download_filename }}?{{query_string}}" class="swiper-lazy">
 	            <div class="swiper-lazy-preloader"></div>
 	            <div class="star-btn">
 	            	{%- if fav.favorite == "true" -%}
@@ -37,14 +37,18 @@
 						{%- set checked_display = "display: none" -%}
 						{%- set unchecked_display = "" -%}
 	            	{%- endif -%}
-	           		<div class="access-icon-checked" style="{{checked_display}}">EVERYONE</div><div class="access-icon-unchecked" style="{{unchecked_display}}">DENY</div>
+	            	{%- if user != "admin" -%}
+						{%- set checked_display = "display: none" -%}
+						{%- set unchecked_display = "display: none" -%}
+	            	{%- endif -%}
+	           		<div class="access-icon-checked" style="{{checked_display}}">DENY</div><div class="access-icon-unchecked" style="{{unchecked_display}}">EVERYONE</div>
 	            </div>
             </div>
 			<div>
-				<a href="{{ main.path }}{{ arw.path }}{{ arw.download_filename }}" class="square-btn">DOWNLOAD RAW {{ arw.download_size }}</a>
+				<a href="{{ main.path }}{{ arw.path }}{{ arw.download_filename }}?{{query_string}}" class="square-btn">DOWNLOAD RAW {{ arw.download_size }}</a>
 			</div>
 			<div>
-				<a class="square-btn" data-exif_info="{{ main.path }}{{ exif_info.path }}{{ exif_info.download_filename }}">EXIF INFO</a>
+				<a class="square-btn" data-exif_info="{{ main.path }}{{ exif_info.path }}{{ exif_info.download_filename }}?{{query_string}}">EXIF INFO</a>
 			</div>
 		</div>
 	{% endfor %}
@@ -57,7 +61,8 @@
 
 <hr>
 <div>
-	<a class="square-btn" href="./jpg.zip">DOWNLOAD ALL</a>
+	<a class="square-btn" href="./jpg.zip">DOWNLOAD JPEG ALL</a>
+	<a class="square-btn" href="./arw.zip">DOWNLOAD RAW ALL</a>
 </div>
 <div>
     <!-- Additional required wrapper -->
@@ -74,7 +79,8 @@
 			<p>{{ main.name }}</p>
 			<div class="btn" data-index="{{ loop.index0 }}">
 
-				<img src="{{ main.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}" />
+				<img src="{{ main.path }}{{ thumbnail.path }}{{ thumbnail.download_filename }}?{{query_string}}" />
+				<div class="icon-thumbnail">
             	{%- if fav.favorite == "true" -%}
 					{%- set display = "" -%}
 				{%- else -%}
@@ -87,7 +93,8 @@
 				{%- else -%}
 					{%- set display = "display: none" -%}
             	{%- endif -%}
-           		<div class="access-icon-thumbnail" style="{{display}}">E</div>
+           		<div class="access-icon-thumbnail" style="{{display}}">D</div>
+           		</div>
 			</div>
 		</div>
 	{% endfor %}

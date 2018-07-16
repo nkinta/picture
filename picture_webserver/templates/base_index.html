@@ -80,7 +80,7 @@ $(function(){
 		 var dataname = parent.attr("dataname");
 		 $.put("./" + dataname + "/", {"favorite": checkedFlag});
 		 
-		 $('#thumbnail_' + dataname).children('.btn').children('.star-icon-thumbnail').toggle();
+		 $('#thumbnail_' + dataname).children('.btn').children('.icon-thumbnail').children('.star-icon-thumbnail').toggle();
 
 	});
 	
@@ -94,7 +94,7 @@ $(function(){
 		 var dataname = parent.attr("dataname");
 		 $.put("./" + dataname + "/", {"users": checkedFlag});
 		 
-		 $('#thumbnail_' + dataname).children('.btn').children('.access-icon-thumbnail').toggle();
+		 $('#thumbnail_' + dataname).children('.btn').children('.icon-thumbnail').children('.access-icon-thumbnail').toggle();
 
 	});
 

@@ -11,17 +11,18 @@ import shutil
 
 YEAR = "2018_"
 
+
 class Error(Exception):
     pass
 
 
 def all_execute(input_directory_path, output_directory_path):
-    
+
     prog = re.compile(r"\d{4}(\d{4})$")
-    
+
     pass_already_exist_flag = True
     new_ext = ".jpg"
-    
+
     input_file_path_list = utility.directory_walk(input_directory_path, [".ARW", ".arw", ".JPG", ".jpg"])
     print(input_file_path_list)
 
@@ -42,7 +43,7 @@ def all_execute(input_directory_path, output_directory_path):
                 continue
             else:
                 raise Error("wring directory name (%s)" % temp_output_directory_name)
-        
+
         output_file_path = os.path.sep.join((temp_file_path_tuple[:-1] + [temp_new_output_directory_name, temp_output_file_name]))
 
         print("copy (%s) -> (%s)" % (input_file_path, output_file_path))
@@ -53,9 +54,8 @@ def all_execute(input_directory_path, output_directory_path):
                     continue
                 else:
                     print(output_file_path)
-                    output_file_path = "%s_%s%s" % (os.path.splitext(output_file_path)[0], 2, os.path.splitext(output_file_path)[1]) #
+                    output_file_path = "%s_%s%s" % (os.path.splitext(output_file_path)[0], 2, os.path.splitext(output_file_path)[1])
 
-                
         directory = os.path.dirname(output_file_path)
         if os.path.isdir(directory) == False:
             os.makedirs(directory)
@@ -68,6 +68,7 @@ def all_execute(input_directory_path, output_directory_path):
         """
         # arw_convert(input_file_path, output_file_path)
     print("end")
+
 
 def main():
 

@@ -46,6 +46,17 @@ class FavJsonEncoder(json.JSONEncoder):
             return o.to_fav_json()
 
         return json.JSONEncoder.default(self, o)
+
+
+class AccessJsonEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if hasattr(o, "to_access_json"):
+            return o.to_access_json()
+
+        return json.JSONEncoder.default(self, o)
+
+
 #vJSON_ENCODER = json.JSONEncoder(default=json_enc_default)
 
 
@@ -76,6 +87,9 @@ class FolderInfo():
         return self.__to_json_common()
 
     def to_fav_json(self):
+        return self.__to_json_common()
+
+    def to_access_json(self):
         return self.__to_json_common()
 
 
@@ -178,6 +192,14 @@ class ImageFileInfo():
         }
         return result
 
+    def to_access_json(self):
+        result = {
+            "name": self.get_name(),
+            "path": "{}/".format(self.get_path().replace("\\", "/")),
+            "children": [],
+        }
+        return result
+
 
 class MovieFileInfo():
 
@@ -265,6 +287,14 @@ class MovieFileInfo():
         return result
 
     def to_fav_json(self):
+        result = {
+            "name": self.get_name(),
+            "path": "{}/".format(self.get_path().replace("\\", "/")),
+            "children": [],
+        }
+        return result
+
+    def to_access_json(self):
         result = {
             "name": self.get_name(),
             "path": "{}/".format(self.get_path().replace("\\", "/")),
@@ -367,6 +397,7 @@ def _create_info_file_all(file_info_list_by_date, cls):
 
     _create_info_file(cf.WEB_ROOT_PATH, JsonEncoder, file_info_list_by_date, cls)
     _create_info_file(cf.FAV_ROOT_PATH, FavJsonEncoder, file_info_list_by_date, cls)
+    _create_info_file(cf.ACCESS_ROOT_PATH, AccessJsonEncoder, file_info_list_by_date, cls)
 
 
 def _create_info_file(root_path, json_encoder, file_info_list_by_date, cls):

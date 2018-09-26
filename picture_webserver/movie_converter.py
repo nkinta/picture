@@ -35,9 +35,12 @@ def create_movie_small(size, bv, ba, input_file_path, output_file_path):
 def create_movie_thumbnail(input_file_path, output_file_path):
 
     if os.path.isdir(os.path.dirname(output_file_path)):
-        return
+        pass
+    else:
+        utility.make_directory(output_file_path)
 
-    utility.make_directory(output_file_path)
+    if os.path.isfile(output_file_path):
+        return
 
     command = (cf.FFMPEG_PATH, "-y", "-i", input_file_path, "-vf", "fps=1/10,scale=480:-1", output_file_path)
     print(command)

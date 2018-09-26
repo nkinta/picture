@@ -9,7 +9,7 @@ import utility
 import define
 import shutil
 
-YEAR = "2017_"
+YEAR = "2018_"
 
 class Error(Exception):
     pass
@@ -22,7 +22,7 @@ def all_execute(input_directory_path, output_directory_path):
     pass_already_exist_flag = True
     new_ext = ".jpg"
     
-    input_file_path_list = utility.directory_walk(input_directory_path, [".ARW", ".arw"])
+    input_file_path_list = utility.directory_walk(input_directory_path, [".ARW", ".arw", ".JPG", ".jpg"])
     print(input_file_path_list)
 
     for input_file_path in input_file_path_list:
@@ -37,7 +37,11 @@ def all_execute(input_directory_path, output_directory_path):
         if m:
             temp_new_output_directory_name = "%s%s" % (YEAR, m.group(1))
         else:
-            raise Error("wring directory name (%s)" % temp_output_directory_name)
+            if (True):
+                print("wring directory name (%s)" % temp_output_directory_name)
+                continue
+            else:
+                raise Error("wring directory name (%s)" % temp_output_directory_name)
         
         output_file_path = os.path.sep.join((temp_file_path_tuple[:-1] + [temp_new_output_directory_name, temp_output_file_name]))
 
@@ -68,7 +72,7 @@ def all_execute(input_directory_path, output_directory_path):
 def main():
 
     input_directory_path = r"U:\dcim"
-    output_directory_path = os.path.join(r"O:\picture", "strage")
+    output_directory_path = os.path.join(r"M:\picture", "strage")
     all_execute(input_directory_path, output_directory_path)
 
 

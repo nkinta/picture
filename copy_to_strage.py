@@ -8,13 +8,18 @@ import re
 import utility
 import define
 import shutil
-
-YEAR = "2018_"
+import datetime
 
 
 class Error(Exception):
     pass
 
+
+def _get_year(file_path):
+    datetime_data = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+    # print(datetime_data.hour)
+    return datetime_data.year
+    
 
 def all_execute(input_directory_path, output_directory_path):
 
@@ -35,8 +40,9 @@ def all_execute(input_directory_path, output_directory_path):
         temp_file_path_tuple = temp_output_directory_path.split(os.path.sep)
         temp_output_directory_name = temp_file_path_tuple[-1]
         m = prog.match(temp_output_directory_name)
+        year = _get_year(input_file_path)
         if m:
-            temp_new_output_directory_name = "%s%s" % (YEAR, m.group(1))
+            temp_new_output_directory_name = "%s_%s" % (year, m.group(1))
         else:
             if (True):
                 print("wring directory name (%s)" % temp_output_directory_name)
@@ -69,11 +75,10 @@ def all_execute(input_directory_path, output_directory_path):
         # arw_convert(input_file_path, output_file_path)
     print("end")
 
-
 def main():
 
-    input_directory_path = r"U:\dcim"
-    output_directory_path = os.path.join(r"M:\picture", "strage")
+    input_directory_path = r"D:\dcim"
+    output_directory_path = os.path.join(r"O:\picture", "strage")
     all_execute(input_directory_path, output_directory_path)
 
 

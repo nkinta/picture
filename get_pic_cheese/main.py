@@ -13,6 +13,10 @@ import json
 import time
 import random
 import ssl
+import change_time
+from bs4 import BeautifulSoup
+
+from PIL import Image
 
 from html import parser as html_parser
 
@@ -27,12 +31,34 @@ COOKIE_FILE_PATH = os.path.join(settings.PICTURE_TEMP_PATH, "cookie.txt")
 JPEG_COOKIE = "CloudFront-Key-Pair-Id=APKAJZ4XANN3SJSZ5TOA; _gid=GA1.2.845150499.1557673672; _ga=GA1.2.421634; _gat=1; CloudFront-Expires=1557843191; CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9jZG4uaW1hZ2UuODEyMi5qcC92MS8qLzgxMjJqcC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNTU3ODQzMTkxfX19XX0_; CloudFront-Signature=Rl0Wu82VvP1QEpL7hd%7ELhlanwmBlNTPIYodG6wn1NhJH3Ea-V2EaqMkM%7E93uw9%7EU-IkV6Qn3pUvrxgKJdYWHuEDKBu622%7ENwvUWd0jZg-t0VY23-8BAQLO6uLTLBh8L2aOAxe1bXgBQt3bfpgRKYEbY8sySQGK%7Eg5L2BChG%7E1bCNHuAYTqgqf-UBEZX4SBrDJXvwVsazmEvGk-%7Ez6a4y6iWuJ2Pvxh7A9LvGRKgOPR6rQ3bq6Zf4XI6nd8ml-5umo0gy6WKO9%7E7RcPfA68%7ED9sK02OSWZ1xXP51S6xEYIC9bUI1WRRcgu64szJiwtkmh3gjOq9-i27tEu7N10E0VWg__"
 
 
-def login_main(opener):
+def get_root_html(opener):
+
+    req = urllib.request.Request(settings.URL_ROOT)
+    req.add_header('accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3')
+    req.add_header('accept-language', settings.HTTP_HEADER_LANGUAGE)
+    req.add_header('User-Agent', settings.HTTP_HEADER_USER_AGENT)
+
+    res = opener.open(req)
+
+    root_html_file_path = os.path.join(settings.PICTURE_TEMP_PATH, "root_html.html")
+    with open(root_html_file_path, mode="wb") as f:
+        f.write(res.read())
+
+    with open(root_html_file_path, mode="r", encoding='utf-8') as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+
+    ethna_csrf_value = soup.find("input", {"name": "ethna_csrf"})["value"]
+
+    return ethna_csrf_value
+
+
+def login_main(opener, ethna_csrf_value):
 
     url_login = settings.URL_ROOT
 
     post = {
         'action_user_login': True,
+        'ethna_csrf': ethna_csrf_value,
         'mailaddress': settings.LOGIN_INFO["mailaddress"],
         'passwd': settings.LOGIN_INFO["passwd"],
         'submit': '',
@@ -48,7 +74,7 @@ def login_main(opener):
     res.close()
 
 
-@utility.try_again(3, 5.0)
+# @utility.try_again(3, 5.0)
 def get_category_list(opener, eventno):
 
     file_path = os.path.join(settings.PICTURE_TEMP_PATH, "event_{}.html".format(eventno))
@@ -79,8 +105,19 @@ def get_category_list(opener, eventno):
         with open(file_path, mode="wb") as f:
             f.write(res.read())
 
-    category_no_list = []
+    with open(file_path, mode="r", encoding='utf-8') as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
 
+    category_no_tag_list = soup.find_all("li", {"class": "p-categoryList_category"})
+    event_info = soup.find("span", {"class": "p-eventInfo_content"})
+
+    date_kanji = event_info.text
+
+    year_month_date = get_date(date_kanji)
+
+    category_no_list = [category_no_tag["data-categoryno"] for category_no_tag in category_no_tag_list]
+
+    """
     class CategoryParser(html_parser.HTMLParser):
 
         def handle_starttag(self, tag, attrs):  # 開始タグを扱うためのメソッド
@@ -96,8 +133,35 @@ def get_category_list(opener, eventno):
         parser.feed(str(f.read()))
 
     parser.close()
+    """
 
-    return category_no_list
+    return category_no_list, year_month_date
+
+"""
+    class DateParser(html_parser.HTMLParser):
+
+        def __init__(self):
+            self.date_read_flag = False
+
+        def handle_starttag(self, tag, attrs):  # 開始タグを扱うためのメソッド
+            if tag == "span":
+                attr_dict = dict(attrs)
+                class_name = attr_dict.get("class", None)
+                if class_name == "p-eventInfo_content":
+                    self.date_read_flag = True
+
+        def handle_data(self, data):
+            if self.date_read_flag:
+                print(data)
+                self.date_read_flag = False
+
+    date_parser = DateParser()
+
+    with open(file_path, mode="r", encoding='utf-8') as f:
+        date_parser.feed(str(f.read()))
+
+    date_parser.close()
+"""
 
 
 @utility.try_again(3, 5.0)
@@ -182,23 +246,56 @@ def download_pic(opener, eventno, url, file_path):
         f.write(jpg)
 
 
-def download_pics(opener, eventno, categoryno, offset, json_data):
+def combine_file(combine_file_path, pic_file_path_0, pic_file_path_1):
+
+    def _get_mask_image(target_image_size):
+        for ref_image_size in ((1200, 800), (1124, 800), (800, 1154), (800, 1200), (1116, 800), (1187, 800), (1167, 800)):
+            if abs((target_image_size[0] / target_image_size[1]) - (ref_image_size[0] / ref_image_size[1])) < 0.02:
+                mask_image = Image.open(os.path.join(settings.MASK_DIRECTORY_PATH, "mask_{}_{}.bmp".format(*ref_image_size))).convert("1").resize(target_image_size)
+                return mask_image
+
+        return None
+
+    image_0 = Image.open(pic_file_path_0)
+    image_1 = Image.open(pic_file_path_1)
+
+    mask_image = _get_mask_image(image_0.size)
+
+    print(pic_file_path_0, image_0.size)
+
+    if (image_0.size == image_1.size == mask_image.size):
+        out_image = Image.composite(image_1, image_0, mask_image)
+
+        print(combine_file_path, out_image.size)
+        utility.make_directory(combine_file_path)
+        out_image.save(combine_file_path)
+
+        # out_image.show()
+
+
+def download_pics(opener, eventno, categoryno, offset, json_data, year_month_date):
 
     for pic_info in json_data["message"]["photos"]:
 
         url_data_list = [pic_info["m_pclogo1"], pic_info["m_pclogo2"]]
         sufix_list = ["1", "2"]
+        year_month_date_num = [int(v) for v in year_month_date]
         cache_file_path_list = [os.path.join(settings.PICTURE_TEMP_PATH, "cache_pic_data", eventno, categoryno, str(offset), "{}_{}.jpg".format(pic_info["n"], s)) for s in sufix_list]
-        save_file_path_list = [os.path.join(settings.PICTURE_TEMP_PATH, "pic_data", eventno, categoryno, str(offset), "{}_{}.jpg".format(pic_info["n"], s)) for s in sufix_list]
+        # vsave_file_path_list = [os.path.join(settings.PICTURE_TEMP_PATH, "pic_data", , categoryno, str(offset), "{}_{}.jpg".format(pic_info["n"], s)) for s in sufix_list]
 
-        for url_data, cache_file_path, save_file_path in zip(url_data_list, cache_file_path_list, save_file_path_list):
+        for url_data, cache_file_path in zip(url_data_list, cache_file_path_list):
             if not os.path.exists(cache_file_path):
                 download_pic(opener, eventno, url_data, cache_file_path)
 
                 time.sleep(random.random())
 
-            # utility.make_directory(save_file_path)
-            # shutil.copy(cache_file_path, save_file_path)
+        combine_file_path = os.path.join(settings.PICTURE_TEMP_PATH, "combine_data", "{}_{:04}_{:02}{:02}".format(eventno, *year_month_date_num), categoryno, str(offset), "{}.jpg".format(pic_info["n"]))
+
+        combine_file(combine_file_path, cache_file_path_list[0], cache_file_path_list[1])
+
+        override_date(combine_file_path, year_month_date)
+        # utility.make_directory(save_file_path)
+        # shutil.copy(cache_file_path, save_file_path)
 
 
 def login(local_test_flag):
@@ -212,9 +309,48 @@ def login(local_test_flag):
     cookie_processor = urllib.request.HTTPCookieProcessor(cookie_jar)
     opener = urllib.request.build_opener(cookie_processor)
 
-    login_main(opener)
+    ethna_csrf_value = get_root_html(opener)
+
+    login_main(opener, ethna_csrf_value)
 
     return opener
+
+DATE_INDEX_DICT = {}
+
+
+def get_date(date_kanji):
+
+    prog = re.compile("(20[12][098])年([01]*[0-9])月([0-3]*[0-9])日")
+
+    m = prog.match(date_kanji)
+    if m:
+        year = m.group(1)
+        month = m.group(2)
+        date = m.group(3)
+
+    return (year, month, date)
+
+
+def override_date(file_path, year_month_date):
+
+    year, month, date = year_month_date
+
+    key = "{}{}{}".format(year, month, date)
+
+    if key not in DATE_INDEX_DICT:
+        DATE_INDEX_DICT[key] = 0
+    else:
+        DATE_INDEX_DICT[key] += 1
+
+    index = DATE_INDEX_DICT[key]
+
+    hour = (int(index / (60 * 60)) % 24)
+    minute = (int(index / 60) % 60)
+    sec = index % 60
+
+    print(hour, minute, sec)
+
+    change_time.set_time(file_path, int(year), int(month), int(date), 12 + hour, minute, sec, 0)
 
 
 def main():
@@ -222,17 +358,18 @@ def main():
     local_test_flag = False
     opener = login(local_test_flag)
 
-    eventno_list = ["284373", "284372", "284371", "284370", "284369", "284368", "284367", "284366", "284365", "284364", "284363", "284362", "280837", "275509", "275510", "265727"]
+    # eventno_list = ["284373", "284372", "284371", "284370", "284369", "284368", "284367", "284366", "284365", "284364", "284363", "284362", "280837", "275509", "275510", "265727"]
+    eventno_list = ["366855", "366854", "366850", "366848", "400437", "349309", "349306", "349307", "348752", "348753", "348751", "338942"]
 
     for eventno in eventno_list:
-        categoryno_list = get_category_list(opener, eventno)
+        categoryno_list, year_month_date = get_category_list(opener, eventno)
 
         for categoryno in categoryno_list:
             print(eventno, categoryno)
             json_data_list = get_picture_list(opener, eventno, categoryno)
             # pprint.pprint(json_data_list)
             for i, json_data in enumerate(json_data_list):
-                download_pics(opener, eventno, categoryno, i * 100, json_data)
+                download_pics(opener, eventno, categoryno, i * 100, json_data, year_month_date)
 
     print("end")
 

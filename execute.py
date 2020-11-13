@@ -398,20 +398,6 @@ def arw_convert(input_file_path, output_file_path):
     exif_data, jpeg_data_list = read_arw(input_file_path)
     write_jpeg(exif_data, jpeg_data_list, output_file_path)
     read_jpeg(output_file_path)
-def jpg_convert(input_file_path, output_file_path):
-    from PIL import Image
-    from PIL import ExifTags
-
-    if os.path.isfile(output_file_path):
-        return
-
-    print("{} -> {}".format(input_file_path, output_file_path))
-
-    img = Image.open(input_file_path)
-    new_img = img.resize((1620, 1080), Image.ANTIALIAS)
-
-    utility.make_directory(output_file_path)
-    new_img.save(output_file_path, quality=95)
 
 
 def arw_read_test():
@@ -434,9 +420,7 @@ def all_execute(input_directory_path, output_directory_path):
     pass_already_exist_flag = True
     new_ext = ".jpg"
 
-    input_file_path_list = utility.directory_walk(input_directory_path,
-                                                  [".ARW", ".arw", ".JPG", ".jpg"],
-                                                  filtering = r".*(?<=\\)DSC[0-9]{5}\.")
+    input_file_path_list = utility.directory_walk(input_directory_path, [".ARW", ".arw"])
     log(input_file_path_list)
 
     for input_file_path in input_file_path_list:
@@ -453,11 +437,7 @@ def all_execute(input_directory_path, output_directory_path):
         if os.path.isdir(directory) == False:
             os.makedirs(directory)
         print("convert (%s) -> (%s)" % (input_file_path, output_file_path))
-        old_ext = splited_tuple[1]
-        if (old_ext.lower() == ".arw"):
-            arw_convert(input_file_path, output_file_path)
-        elif (old_ext.lower() == ".jpg"):
-            jpg_convert(input_file_path, output_file_path)
+        arw_convert(input_file_path, output_file_path)
 
 
 def main():
@@ -466,8 +446,12 @@ def main():
     # one_file_test()
 
     # input_directory_path = os.path.join("O:\picture", "pentax")
-    input_directory_path = os.path.join("M:\picture", "strage")
-    output_directory_path = os.path.join("M:\picture", "upload")
+    # input_directory_path = os.path.join("F:\picture", "strage")
+    # output_directory_path = os.path.join("F:\picture", "upload")
+
+    input_directory_path = r"D:\image\imagedata_change\smartphone\arw"
+    output_directory_path = r"D:\image\imagedata_change\smartphone\jpg"
+
     all_execute(input_directory_path, output_directory_path)
     print("end")
 

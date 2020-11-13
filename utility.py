@@ -14,6 +14,25 @@ class Error(Exception):
     pass
 
 
+def try_again(try_number=3, interval=1.0):
+    def result_function(func):
+        def main_function(*args, **kwargs):
+            for i in range(try_number):
+                if i > 0:
+                    print("try again number {}".format(i))
+                try:
+                    result = func(*args, **kwargs)
+                except:
+                    if (i >= try_number - 1):
+                        raise
+                    time.sleep(interval)
+                    continue
+                break
+            return result
+        return main_function
+    return result_function
+
+
 def create_pack_list(input_directory_path, output_directory_path, file_list, pack_file_ext):
     temp_pack_dict = {}
 

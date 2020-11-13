@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 
 import os
@@ -8,10 +8,23 @@ import utility
 import define
 
 import datetime
+import win32_setctime
 
 
 class Error(Exception):
     pass
+
+
+def set_time(file_path, year, month, day, hour, minute, second, microsecond):
+
+    date_time_tuple = (year, month, day, hour, minute, second, microsecond)
+
+    ctime = datetime.datetime(*date_time_tuple).timestamp()
+    mtime = datetime.datetime(*date_time_tuple).timestamp()
+    atime = datetime.datetime(*date_time_tuple).timestamp()
+
+    win32_setctime.setctime(file_path, ctime)
+    os.utime(file_path, (atime, mtime))
 
 
 def offset_time(file_path, offset_date, offset_our):
@@ -39,11 +52,10 @@ def main():
     input_directory_path = r""
     all_execute(offset_date, offset_our, input_directory_path, [".MP4", ".mp4"])
 
-
 """
 def main():
 
-    file_path = r"C:\Users\nkinta\Desktop\imagedata_change\ldv_p\arw\DSC01196.ARW"
+    file_path = r"C:\\Users\nkinta\imagedata_change\ldv_p\arw\DSC01196.ARW"
 
     path_stat = os.stat(file_path)
 
@@ -58,7 +70,6 @@ def main():
 
     os.utime(file_path, (path_stat.st_atime + (plus_date * date_offset), path_stat.st_mtime + (plus_date * date_offset)))
 """
-
 
 if __name__ == "__main__":
     main()

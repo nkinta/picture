@@ -145,7 +145,7 @@ def login_main(opener, login_id, password, phrase):
 
 
 @utility.try_again(3, 5.0)
-def get_photo_param(opener, group_id, photo_no):
+def get_photo_param(opener, group_id, photo_no, photo_page_offset, jpg_upper_case):
 
     file_path = os.path.join(settings.PICTURE_TEMP_PATH, "g_{}".format(group_id), "photo_param", "photo_{}.json".format(photo_no))
 
@@ -153,17 +153,25 @@ def get_photo_param(opener, group_id, photo_no):
 
         get_photo_url = "{}{}".format(settings.URL_ROOT, r"api/photo/get/photo.html")
 
-        page_id = (photo_no - 1) // PAGE_NUM + 1
+        page_id = (photo_no - photo_page_offset - 1) // PAGE_NUM + 1
+
+        jpg_string = "jpg"
+        if jpg_upper_case:
+            jpg_string = jpg_string.upper()
 
         post = {
             'photoListGetType': "FRONT_GROUP_DETAIL_GROUP_ID",
             'pageId': page_id,
-            "photoId": "{:0=4}::{:0=4}.jpg".format(group_id, photo_no),
+            "photoId": "{:0=4}::{:0=4}.{}".format(group_id, photo_no, jpg_string),
         }
+
+        print("", post)
 
         req = urllib.request.Request(get_photo_url)
         add_default_header(req)
-        req.add_header('Referer', "{}{}".format(settings.URL_ROOT, r"front/group/change.html?nextAction=front_group_detail&group_id={}&thumbnail_type=230").format(group_id))
+        # req.add_header('Referer', "{}{}".format(settings.URL_ROOT, r"front/group/change.html?nextAction=front_group_detail&group_id={}&thumbnail_type=230").format(group_id))
+        # https://phst.jp/yazawa/front/group/change.html?group_id=2176&nextAction=front_group_detail&pageID=1
+        req.add_header('Referer', "{}{}".format(settings.URL_ROOT, r"front/group/change.html?nextAction=front_group_detail&group_id={}&pageID={}").format(group_id, page_id))
         data = urllib.parse.urlencode(post).encode('utf-8')
 
         with opener.open(req, data) as res:
@@ -184,6 +192,7 @@ def get_photo_param(opener, group_id, photo_no):
             except:
                 print("json read error ({})".format(file_path))
 
+    pprint.pprint(json_data)
     photo_key_enc = json_data["content"]["photo"]["options"]["zoomUrl"]["image02"]["urlQueryList"]["photoKeyEnc"]
     onetime_key = json_data["content"]["onetimeKey"]
 
@@ -266,16 +275,18 @@ def get_generator(opener, group_id, photo_no, photo_key_enc, onetime_key):
     return jpg_path_list, json_object
 
 
-def get_category_list(opener, page_no):
+def get_category_list(opener, group_id):
 
-    file_path = os.path.join(settings.PICTURE_TEMP_PATH, "change_{}.html".format(page_no))
+    file_path = os.path.join(settings.PICTURE_TEMP_PATH, "change_{}.html".format(group_id))
 
-    if not os.path.isfile(file_path):
+    if True:
 
         parse_result = urllib.parse.urlparse("{}{}".format(settings.URL_ROOT, r"front/group/change.html"))
 
         query_dict = {
-            'nextAction': 'front_group_detail'
+            'nextAction': 'front_group_detail',
+            "group_id": group_id,
+            "gm_visible": "gm_b_1::1,gm_b_2::1,gm_b_3::1"
         }
 
         scheme, netloc, path, params, _, fragment = parse_result
@@ -423,11 +434,11 @@ def get_split_dir(json_object):
     return combine_direction
 
 
-def download_pic(opener, group_id, start_no, end_no):
+def download_pic(opener, group_id, start_no, end_no, photo_page_offset, jpg_upper_case):
 
     for photo_no in range(start_no, end_no):
         file_path = get_result_file_path(group_id, photo_no)
-        photo_key_enc, onetime_key = get_photo_param(opener, group_id, photo_no)
+        photo_key_enc, onetime_key = get_photo_param(opener, group_id, photo_no, photo_page_offset, jpg_upper_case)
         div_file_path_list, json_object = get_generator(opener, group_id, photo_no, photo_key_enc, onetime_key)
 
         combine_direction = get_split_dir(json_object)
@@ -458,22 +469,31 @@ def combine_only(group_id, start_no, end_no):
 
 
 def main():
-    group_id = 1762
 
-    combine_only(group_id, 1, 1147)
+    group_id = 2175     # photo.html 2174
+    start_pic = 2001
+    last_pic = 2012
+    jpg_upper_case = False
 
-    return
+    """
+    group_id = 2174     # photo.html 2174
+    start_pic = 1
+    last_pic = 10
+    start_pic_offset = start_pic - 1
+
+    """
 
     local_test_flag = False
     do_login_flag = True
 
-    login_id = "bora010"
-    password = "bbb010"
+    login_id = "bora011"
+    password = "bbb011"
 
     opener = login(login_id, password, local_test_flag, do_login_flag)
 
-    get_category_list(opener, 2)
-    download_pic(opener, group_id, 1, 1147)
+    start_pic_offset = start_pic - 1
+    get_category_list(opener, group_id)
+    download_pic(opener, group_id, start_pic, last_pic, start_pic_offset, jpg_upper_case)
 
     # get_category_list()
     print("end")
